@@ -59,6 +59,9 @@ def save():
     subject = str_escape(req_json.get('subject'))
     content = str_escape(req_json.get('content'))
     user_id = current_user.id
+    print(receiver)
+    print(subject)
+    print(content)
 
     try:
         msg = Message(subject=subject, recipients=receiver.split(";"), body=content)

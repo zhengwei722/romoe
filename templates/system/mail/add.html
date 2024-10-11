@@ -53,7 +53,7 @@
     form.on('submit(mail-save)', function (data) {
       let loading = layer.load()
       $.ajax({
-        url: '/admin/mail/save',
+        url: '/system/mail/save',
         data: JSON.stringify(data.field),
         dataType: 'json',
         contentType: 'application/json',

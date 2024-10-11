@@ -71,13 +71,14 @@ class BaseConfig:
     """
     flask-mail配置
     """
-    MAIL_SERVER = cfg['MYSQL_DATABASE']
+    MAIL_SERVER = cfg['MAIL_SERVER']
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
     MAIL_PORT = cfg['MAIL_PORT']
     MAIL_USERNAME = cfg['MAIL_USERNAME']
     MAIL_PASSWORD = cfg['MAIL_PASSWORD']  # 生成的授权码
     MAIL_DEFAULT_SENDER = MAIL_USERNAME
+
     """
     session
     """
@@ -86,6 +87,6 @@ class BaseConfig:
     SESSION_TYPE = cfg['SESSION_TYPE'] # 默认使用文件系统来保存会话
     SESSION_PERMANENT = False  # 会话是否持久化
     SESSION_USE_SIGNER = True  # 是否对发送到浏览器上 session 的 cookie 值进行加密
-    SESSION_REDIS_DB = cfg['SESSION_REDIS_DB']
+    SESSION_REDIS_DB = cfg['REDIS_DB']
     SESSION_REDIS = redis.from_url(f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{SESSION_REDIS_DB}')
 
