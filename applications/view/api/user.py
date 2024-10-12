@@ -18,11 +18,16 @@ from applications.config import cfg
 from sqlalchemy.exc import SQLAlchemyError
 from aiosmtplib.errors import SMTPDataError
 from applications.common.utils.redis import conn_redis_pool
-
+from applications.common.utils.jwt import token_required,create_jwt_token
 bp = Blueprint('user', __name__, url_prefix='/user')
 
+'''
+获取验证码接口
+email:邮箱
+'''
 @bp.post('/get_email_code')
 def get_email_code():
+    # 验证数据
     try:
         email = request.json.get('email')
         if email is None:
@@ -34,11 +39,8 @@ def get_email_code():
         return CustomResponse(code=CustomStatus.EMAIL_FORMAT_MISALIGNMENT.value, msg="邮箱格式错误")
     except Exception as e:
         return CustomResponse(code=CustomStatus.INCOMPLETE_DATA.value, msg="数据不完整")
+    # 发送验证码
     try:
-        user = User.query.filter_by(username=email).first()
-        if user:
-            return CustomResponse(code=CustomStatus.USERNAME_ALREADY_EXISTS.value, msg="用户已存在")
-
         email_code = f"{random.randint(0, 999999):06d}"
         # 创建 Redis 连接
         redis_client = conn_redis_pool()
@@ -59,9 +61,16 @@ def get_email_code():
         return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg=str(e))
 
 
-#   用户分页查询
+'''
+注册接口-重置密码
+email:邮箱
+email_code:验证码
+password:密码
+confirm_password:确认密码
+'''
 @bp.post('/register')
 def register():
+    # 验证数据
     try:
         email = request.json.get('email')
         email_code = request.json.get('email_code')
@@ -81,11 +90,7 @@ def register():
             return CustomResponse(code=CustomStatus.PASSWORD_INSUFFICIENT_LENGTH.value, msg="密码长度必须至少为8个字符")
     except Exception as e:
         return CustomResponse(code=CustomStatus.INCOMPLETE_DATA.value, msg="数据不完整")
-
-
-
-
-
+    # 验证码
     try:
         redis_client = conn_redis_pool()
         login_code_info = redis_client.hgetall(f'email_code:{email}')
@@ -104,14 +109,15 @@ def register():
             return CustomResponse(code=CustomStatus.LOGIN_CODE_MISS.value, msg="验证码错误", data=data)
         redis_client.delete(f'email_code:{email}')
     except Exception as e:
-        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg=f"登录码验证异常:{str(e)}")
-
-
-
+        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg=f"验证异常:{str(e)}")
+    # 保存用户数据
     try:
         user = User.query.filter_by(username=email).first()
         if user:
-            return CustomResponse(code=CustomStatus.USERNAME_ALREADY_EXISTS.value, msg="用户已存在")
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            return CustomResponse(code=CustomStatus.PASSWORD_RESET_SUCCESS.value, msg="密码重置成功")
         user = User(username=email, realname=email, enable=1)
         user.set_password(password)
         db.session.add(user)
@@ -122,15 +128,75 @@ def register():
     except Exception as e:
         return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误")
 
+'''
+登录接口
+email:邮箱
+password:密码
+'''
+@bp.post('/login')
+def login():
+    # 验证数据
+    try:
+        email = request.json.get('email')
+        password = request.json.get('password')
+        if email is None:
+            return CustomResponse(code=CustomStatus.PARAM_ERROR.value,msg="请填写邮箱地址")
+        try:
+            validate_email(email)
+        except EmailNotValidError as e:
+            return CustomResponse(code=CustomStatus.EMAIL_FORMAT_MISALIGNMENT.value, msg="邮箱格式错误")
+        if len(password) < 8:
+            return CustomResponse(code=CustomStatus.PASSWORD_INSUFFICIENT_LENGTH.value, msg="密码长度必须至少为8个字符")
+    except Exception as e:
+        return CustomResponse(code=CustomStatus.INCOMPLETE_DATA.value, msg="数据不完整")
+    # 返回数据
+    try:
+        user = User.query.filter_by(username=email).first()
+        if not user:
+            return CustomResponse(code=CustomStatus.USER_NOT_FOUND.value,msg='用户不存在')
 
+        if not user.validate_password(password):
+            return CustomResponse(code=CustomStatus.AUTHENTICATION_FAILED.value, msg='密码错误')
+        # 获取token
+        tokenData = {"userId": user.id}
+        token = create_jwt_token(tokenData)
 
+        data = {
+            'id': user.id,
+            'username': user.username,
+            "realname": user.realname,
+            "token":token,
 
-#   用户分页查询
+        }
+
+        return CustomResponse(code=CustomStatus.SUCCESS.value,msg='登录成功',data=data)
+    except SQLAlchemyError:
+        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误")
+    except Exception as e:
+        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg=f"服务端错误",data=str(e))
+
+'''
+快速获取验证码接口
+email:邮箱
+'''
 @bp.post('/get_code')
 def get_code():
     email = request.json.get('email')
-
     redis_client = conn_redis_pool()
     login_code_info = redis_client.hgetall(f'email_code:{email}')
-
     return {"data":login_code_info}
+
+'''
+鉴权案例
+'''
+@bp.post('/other')
+@token_required
+def other(userId):
+    user = User.query.filter_by(id=int(userId)).first()
+    data = {
+        'id': user.id,
+        'username': user.username,
+        'email': user.password_hash,
+        # 其他需要返回的用户信息
+    }
+    return {"data":data}
