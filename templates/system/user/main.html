@@ -59,10 +59,7 @@
             新增
         </button>
     {% endif %}
-    <button class="pear-btn pear-btn-md" lay-event="collasped">
-        <i class="pear-icon pear-icon-modular"></i>
-        高级
-    </button>
+
 </script>
 
 {# 用户修改操作 #}
@@ -111,7 +108,6 @@
                 {title: 'id', field: 'id', align: 'center'},
                 {title: '姓名', field: 'realname', align: 'center', width: 110},
                 {title: '账号', field: 'username', align: 'center'},
-                {title: '部门', field: 'dept_name', align: 'center'},
                 {title: '启用', field: 'enable', align: 'center', templet: '#user-enable', width: 120},
                 {title: '注册时间', field: 'create_at', templet: '#user-createTime', align: 'center'},
                 {title: '更新时间', field: 'update_at', templet: '#user-updateTime', align: 'center'},
@@ -132,44 +128,10 @@
             defaultToolbar: [{layEvent: 'refresh', icon: 'layui-icon-refresh'}, 'filter', 'print', 'exports'] /*默认工具栏*/
         })
 
-        // 公司部门树状图菜单
-        dtree.render({
-            elem: '#dept-tree',
-            method: 'get',
-            url: '/system/dept/tree',
-            dataFormat: 'list',
-            line: true,
-            skin: 'laySimple',
-            icon: '-1',
-            response: {treeId: 'id', parentId: 'parent_id', title: 'dept_name'},
-        })
 
-        // 菜单栏渲染
-        dtree.on('node(\'dept-tree\')', function (obj) {
-            let field = form.val('user-query-form') /*用户账号查询*/
-            field.deptId = obj.param.nodeId
-            window.refresh(field)
-        })
 
-        //
-        $('.user-group').click(function () {
-            let group = $(this).attr('user-group')
-            let field = form.val('user-query-form')
-            if (group === '-1') {
-                field.deptId = group
-                $(this).removeClass('button-default')
-                $(this).prev().removeClass('button-primary')
-                $(this).prev().addClass('button-default')
-                $(this).addClass('button-primary')
-            } else {
-                field.deptId = group
-                $(this).removeClass('button-default')
-                $(this).next().removeClass('button-primary')
-                $(this).next().addClass('button-default')
-                $(this).addClass('button-primary')
-            }
-            window.refresh(field)
-        })
+
+
 
         table.on('tool(user-table)', function (obj) {
             if (obj.event === 'remove') {

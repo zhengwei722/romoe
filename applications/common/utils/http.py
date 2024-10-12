@@ -82,8 +82,8 @@ class CustomStatus(Enum):
     LOGIN_CODE_TO_MANY_TRY = 5004
     # 没找到用户
     USER_NOT_FOUND = 5005
-    # 用户不是企业用户
-    USER_NOT_BUSINESS_USER = 5006
+    # 用户封禁
+    USER_BAN = 5006
     # 邮箱格式错误
     EMAIL_FORMAT_MISALIGNMENT = 5007
     # 用户名已经存在

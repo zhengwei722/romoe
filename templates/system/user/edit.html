@@ -32,12 +32,7 @@
                                class="layui-input">
                     </div>
                 </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label">部门</label>
-                    <div class="layui-input-block">
-                        <ul id="selectParent" name="deptId" class="dtree" data-id="0"></ul>
-                    </div>
-                </div>
+
 
 
                 <div class="layui-form-item">
@@ -76,16 +71,7 @@
         let $ = layui.jquery
         let dtree = layui.dtree
 
-        dtree.renderSelect({
-            elem: '#selectParent',
-            url: '/system/dept/tree',
-            method: 'get',
-            selectInputName: {nodeId: 'deptId', context: 'deptName'},
-            skin: 'layui',
-            dataFormat: 'list',
-            response: {treeId: 'id', parentId: 'parent_id', title: 'dept_name'},
-            selectInitVal: "{{ user.dept_id }}"
-        })
+
         form.on('submit(user-update)', function (data) {
             let roleIds = ''
             $('input[type=checkbox]:checked').each(function () {

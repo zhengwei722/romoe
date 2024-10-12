@@ -8,7 +8,7 @@ from applications.common.utils.http import table_api, fail_api, success_api
 from applications.common.utils.rights import authorize
 from applications.common.utils.validate import str_escape
 from applications.extensions import db
-from applications.models import Role, Dept
+from applications.models import Role
 from applications.models import User, AdminLog
 from applications.common.utils.http import CustomResponse ,CustomStatus
 import random
@@ -50,8 +50,8 @@ def get_email_code():
 
         body_content = cfg["LOGIN_CODE_EMAIL_BODY_CONTENT"].format(login_code=email_code)
 
-        # msg = Message(subject="欢迎使用Romoe", recipients=email.split(";"), body=body_content)
-        # flask_mail.send(msg)
+        msg = Message(subject="欢迎使用Romoe", recipients=email.split(";"), body=body_content)
+        flask_mail.send(msg)
         return CustomResponse(msg="发送成功")
     except SQLAlchemyError:
         return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误")
@@ -119,6 +119,8 @@ def register():
             db.session.commit()
             return CustomResponse(code=CustomStatus.PASSWORD_RESET_SUCCESS.value, msg="密码重置成功")
         user = User(username=email, realname=email, enable=1)
+        roles = Role.query.filter(Role.id.in_(['2'])).all()
+        user.role = roles
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
@@ -157,6 +159,8 @@ def login():
 
         if not user.validate_password(password):
             return CustomResponse(code=CustomStatus.AUTHENTICATION_FAILED.value, msg='密码错误')
+        if user.enable == 0:
+            return CustomResponse(code=CustomStatus.USER_BAN.value, msg='用户被封禁')
         # 获取token
         tokenData = {"userId": user.id}
         token = create_jwt_token(tokenData)
@@ -193,10 +197,13 @@ def get_code():
 @token_required
 def other(userId):
     user = User.query.filter_by(id=int(userId)).first()
+
+    roles = user.role.all()
     data = {
         'id': user.id,
         'username': user.username,
         'email': user.password_hash,
         # 其他需要返回的用户信息
+        "roles":roles[0].name
     }
     return {"data":data}

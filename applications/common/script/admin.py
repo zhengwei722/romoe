@@ -3,7 +3,7 @@ import datetime
 from flask.cli import AppGroup
 
 from applications.extensions import db
-from applications.models import User, Role, Dept, Power
+from applications.models import User, Role, Power
 
 admin_cli = AppGroup("admin")
 
@@ -63,72 +63,7 @@ roledata = [
         create_time=now_time,
     )
 ]
-deptdata = [
-    Dept(
-        id=1,
-        parent_id=0,
-        dept_name='总公司',
-        sort=1,
-        leader='就眠仪式',
-        phone='12312345679',
-        email='123qq.com',
-        status=1,
-        remark='这是总公司',
-        create_at=now_time
-    ),
-    Dept(
-        id=4,
-        parent_id=1,
-        dept_name='济南分公司',
-        sort=2,
-        leader='就眠仪式',
-        phone='12312345679',
-        email='123qq.com',
-        status=1,
-        remark='这是济南',
-        create_at=now_time
 
-    ),
-    Dept(
-        id=5,
-        parent_id=1,
-        dept_name='唐山分公司',
-        sort=4,
-        leader='mkg',
-        phone='12312345679',
-        email='123qq.com',
-        status=1,
-        remark='这是唐山',
-        create_at=now_time
-
-    ),
-    Dept(
-        id=7,
-        parent_id=4,
-        dept_name='济南分公司开发部',
-        sort=5,
-        leader='就眠仪式',
-        phone='12312345679',
-        email='123qq.com',
-        status=1,
-        remark='测试',
-        create_at=now_time
-
-    ),
-    Dept(
-        id=8,
-        parent_id=5,
-        dept_name='唐山测试部',
-        sort=5,
-        leader='mkg',
-        phone='12312345679',
-        email='123qq.com',
-        status=1,
-        remark='测试部',
-        create_at=now_time
-
-    )
-]
 powerdata = [
     Power(
         id=1,
@@ -562,8 +497,6 @@ def init_db():
     print("加载系统必须用户数据")
     db.session.add_all(roledata)
     print("加载系统必须角色数据")
-    db.session.add_all(deptdata)
-    print("加载系统必须部门数据")
     db.session.add_all(powerdata)
     print("加载系统必须权限数据")
     db.session.commit()

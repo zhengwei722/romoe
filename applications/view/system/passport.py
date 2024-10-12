@@ -4,7 +4,7 @@ from flask_login import current_user, login_user, login_required, logout_user
 from applications.common import admin as index_curd
 from applications.common.admin_log import login_log
 from applications.common.utils.http import fail_api, success_api
-from applications.models import User
+from applications.models import User,Role
 
 bp = Blueprint('passport', __name__, url_prefix='/passport')
 
@@ -52,6 +52,11 @@ def login_post():
     if user.enable == 0:
         return fail_api(msg="用户被暂停使用")
 
+    is_admin = Role.query.filter_by(id=1).first() in user.role
+
+    if not is_admin:
+        return fail_api(msg="无管理员权限")
+
     if username == user.username and user.validate_password(password):
         # 登录
         login_user(user, remember=remember)
@@ -59,6 +64,7 @@ def login_post():
         login_log(request, uid=user.id, is_access=True)
         # 授权路由存入session
         role = current_user.role
+
         user_power = []
         for i in role:
             if i.enable == 0:
