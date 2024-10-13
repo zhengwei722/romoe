@@ -10,7 +10,7 @@ from flask import Flask, request, jsonify
 from applications.models import User, AdminLog
 from applications.common.utils.http import CustomResponse ,CustomStatus
 from applications.common.utils.redis import conn_redis_pool
-
+from applications.common.admin_log import login_log,api_log
 
 
 
@@ -49,6 +49,7 @@ def token_required_decorator(f):
         token = request.headers.get('Authorization')
 
         if not token:
+            api_log(request, datetime.now(), datetime.now(), '0.00', {}, None, '令牌无效', is_access=True)
             return CustomResponse(code=CustomStatus.TOKEN_INVALID.value, msg=f"令牌无效")
         # 尝试解析令牌
         try:
@@ -60,10 +61,12 @@ def token_required_decorator(f):
             session_key = hashlib.sha256((str(userId) + cfg["SESSION_SALT"]).encode()).hexdigest()
             client_key = redis_client.get(f"session:{session_key}")
             if not client_key or client_key != data.get("client_key"):
+                api_log(request, datetime.now(), datetime.now(), '0.00', {}, None, '令牌无效',is_access=True)
                 return CustomResponse(code=CustomStatus.TOKEN_INVALID.value, msg=f"令牌无效")
             redis_client.expire(f"session:{session_key}", ACCESS_TOKEN_EXPIRE_MINUTES)
         except:
             # 如果令牌无效或过期，返回错误响应
+            api_log(request, datetime.now(), datetime.now(), '0.00', {}, None, '令牌无效', is_access=True)
             return CustomResponse(code=CustomStatus.TOKEN_INVALID.value, msg=f"令牌无效")
 
         # 将用户身份信息传递给原始函数
