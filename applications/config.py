@@ -4,20 +4,24 @@ import redis
 import toml
 import os
 # from urllib.parse import quote_plus as urlquote
-cfg = None
-env_filename = os.getenv("CUSTOM_ENV_TOML") or 'pro_env.yaml'
 
-try:
-    with open(env_filename, encoding='utf-8') as tomlfile:
-        cfg = toml.load(tomlfile)
-except FileNotFoundError:
-    # 如果 pro_env.yaml 文件不存在，尝试打开 env.yaml
-    env_filename = 'env.yaml'
+cfg = None
+env_filenames = [
+    os.getenv("CUSTOM_ENV_TOML") or 'pro_env.yaml',
+    'test_env.yaml',
+    'local_env.yaml'
+]
+
+for env_filename in env_filenames:
     try:
         with open(env_filename, encoding='utf-8') as tomlfile:
             cfg = toml.load(tomlfile)
+        print(f"环境配置文件加载成功。当前环境： {env_filename}")
+        break  # 如果文件存在并成功加载，则跳出循环
     except FileNotFoundError:
-        print(f"环境文件 {env_filename} 未找到。")
+        print(f"环境文件 {env_filename} 未找到。尝试下一个文件...")
+        cfg = None  # 重置 cfg 以确保在下一个循环中不会使用旧的配置
+
 
 class BaseConfig:
     SUPERADMIN = cfg['SUPERADMIN']
