@@ -9,24 +9,77 @@
 
 <div class="layui-card">
     <div class="layui-card-body">
-        <div class="layui-tab layui-tab-card">
-            <ul class="layui-tab-title">
-                <li class="layui-this">登录日志</li>
-                <li>操作日志</li>
-            </ul>
-            <div class="layui-tab-content">
-                <div class="layui-tab-item layui-show">
-                    <table style="margin-top: 10px;" id="log-login-table" lay-filter="log-login-table"></table>
+        <form class="layui-form" action="" lay-filter="user-query-form">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">日期</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="date" placeholder="请选择日期" class="layui-input" id="date">
+                    </div>
                 </div>
-                <div class="layui-tab-item">
-                    <table style="margin-top: 10px;" id="log-operate-table" lay-filter="log-operate-table"></table>
+                <div class="layui-inline">
+                    <label class="layui-form-label">状态</label>
+                    <div class="layui-input-inline">
+                        <select name="status" lay-filter="status">
+                            <option value="">请选择状态</option>
+                            <option value="0">失败</option>
+                            <option value="1">成功</option>
+                        </select>
+                    </div>
                 </div>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="user-query">
+                            <i class="layui-icon layui-icon-search"></i>
+                            查询
+                        </button>
+                        <button type="reset" class="pear-btn pear-btn-md">
+                            <i class="layui-icon layui-icon-refresh"></i>
+                            重置
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="layui-card-body">
+    <div class="layui-tab layui-tab-card">
+        <ul class="layui-tab-title">
+            <li class="layui-this">API日志</li>
+            {#            <li>操作日志</li>#}
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <table style="margin-top: 10px;" id="log-login-table" lay-filter="log-login-table"></table>
+            </div>
+            <div class="layui-tab-item">
+                <table style="margin-top: 10px;" id="log-operate-table" lay-filter="log-operate-table"></table>
             </div>
         </div>
     </div>
 </div>
-</body>
+</div>
 
+</body>
+<script src="{{ url_for('static', filename='system/component/layui/layui.js') }}"></script>
+<script>
+    layui.use(['form', 'laydate'], function () {
+        var form = layui.form;
+        var laydate = layui.laydate;
+
+        // 自定义的日期选择器
+        laydate.render({
+            elem: '#date', // 绑定元素
+            type: 'date', // 类型
+            format: 'yyyy-MM-dd', // 日期格式
+            placeholder: '请选择日期' // 提示文本
+
+        });
+
+    });
+</script>
 
 <script type="text/html" id="log-createTime">
     {{ '  {{layui.util.toDateString(d.create_time,  "yyyy-MM-dd HH:mm:ss")}' |safe }}}
@@ -40,74 +93,102 @@
 </script>
 {% include 'system/common/footer.html' %}
 <script>
-  layui.use(['table', 'form', 'jquery', 'element', 'util'], function () {
-    let table = layui.table
-    let form = layui.form
+    layui.use(['table', 'form', 'jquery', 'element', 'util'], function () {
+        let table = layui.table
+        let form = layui.form
 
-    let MODULE_PATH = '/system/log/'
 
-    let cols = [
-      [
-        { title: 'ID', field: 'id', align: 'center' },
-        { title: '请求方式', field: 'method', align: 'center' },
-        { title: '接口', field: 'url', align: 'center' },
-        { title: '浏览器', field: 'user_agent', align: 'center' },
-        { title: '操作地址', field: 'ip', align: 'center' },
-        { title: '访问时间', field: 'create_time', templet: '#log-createTime', align: 'center' },
-        { title: '操作人ID', field: 'uid', align: 'center' },
-        { title: '描述', field: 'desc', align: 'center' },
-        { title: '访问状态', templet: '#log-status', align: 'center' }
-      ]
-    ]
+        let MODULE_PATH = '/system/log/'
 
-    table.render({
-      elem: '#log-operate-table',
-      url: MODULE_PATH + 'operateLog',
-      page: true,
-      cols: cols,
-      skin: 'line',
-      toolbar: false
-    })
+        let cols = [
+            [
+                {title: 'ID', field: 'id', align: 'center'},
+                {title: '请求方式', field: 'method', align: 'center'},
+                {title: '操作人ID', field: 'uid', align: 'center'},
+                {title: '接口', field: 'url', align: 'center'},
+                {title: '请求', field: 'request_body', align: 'center'},
+                {title: '回复', field: 'response_body', align: 'center'},
+                {title: '开始时间', field: 'starttime', templet: '#log-createTime', align: 'center'},
+                {title: '结束时间', field: 'endtime', templet: '#log-createTime', align: 'center'},
+                {title: '总耗时', field: 'totaltime', align: 'center'},
+                {title: '访问状态', templet: '#log-status', align: 'center'},
+                {title: 'tis', field: 'tips', align: 'center'},
+            ]
+        ]
+        let cols1 = [
+            [
+                {title: 'ID', field: 'id', align: 'center'},
+                {title: '请求方式', field: 'method', align: 'center'},
+                {title: '接口', field: 'url', align: 'center'},
+                {title: '浏览器', field: 'user_agent', align: 'center'},
+                {title: '操作地址', field: 'ip', align: 'center'},
+                {title: '访问时间', field: 'create_time', templet: '#log-createTime', align: 'center'},
+                {title: '操作人ID', field: 'uid', align: 'center'},
+                {title: '描述', field: 'desc', align: 'center'},
+                {title: '访问状态', templet: '#log-status', align: 'center'}
+            ]
+        ]
 
-    table.render({
-      elem: '#log-login-table',
-      url: MODULE_PATH + 'loginLog',
-      page: true,
-      cols: cols,
-      skin: 'line',
-      toolbar: false
-    })
+        table.render({
+            elem: '#log-operate-table',
+            url: MODULE_PATH + 'systemLog',
+            page: true,
+            cols: cols1,
+            skin: 'line',
+            toolbar: '#user-toolbar', /*工具栏*/
+            defaultToolbar: [{layEvent: 'refresh', icon: 'layui-icon-refresh'}, 'filter', 'print', 'exports'] /*默认工具栏*/
+        })
 
-    form.on('submit(dict-type-query)', function (data) {
-      table.reload('dict-type-table', { where: data.field })
-      return false
-    })
+        table.render({
+            elem: '#log-login-table',
+            url: MODULE_PATH + 'apiLog',
+            page: true,
+            cols: cols,
+            skin: 'line',
+            toolbar: '#user-toolbar', /*工具栏*/
+            defaultToolbar: [{layEvent: 'refresh', icon: 'layui-icon-refresh'}, 'filter', 'print', 'exports'] /*默认工具栏*/
+        })
 
-    table.on('tool(log-operate-table)', function (obj) {
-      if (obj.event === 'details') {
-        window.info(obj)
-      }
-    })
+        form.on('submit(dict-type-query)', function (data) {
+            table.reload('dict-type-table', {where: data.field})
+            return false
+        })
 
-    table.on('tool(log-login-table)', function (obj) {
-      if (obj.event === 'details') {
-        window.info(obj)
-      }
-    })
+        table.on('tool(log-operate-table)', function (obj) {
+            if (obj.event === 'details') {
+                window.info(obj)
+            }
+        })
 
-    window.info = function (obj) {
-      layer.open({
-        type: 2,
-        title: '详细信息',
-        shade: 0,
-        area: ['400px', '400px'],
-        content: MODULE_PATH + 'info',
-        success: function (layero) {
-          let iframeWin = window[layero.find('iframe')[0]['name']]
-          iframeWin.show(obj.data)
+        table.on('tool(log-login-table)', function (obj) {
+            if (obj.event === 'details') {
+                window.info(obj)
+            }
+        })
+        form.on('submit(user-query)', function (apiLog) {
+            window.refresh(apiLog.field)
+            return false
+        })
+        window.refresh = function (param) {
+            table.reload('log-login-table', {where: param})
+            table.reload('log-operate-table', {where: param})
         }
-      })
-    }
-  })
+
+        window.info = function (obj) {
+            layer.open({
+                type: 2,
+                title: '详细信息',
+                shade: 0,
+                area: ['400px', '400px'],
+                content: MODULE_PATH + 'info',
+                success: function (layero) {
+                    let iframeWin = window[layero.find('iframe')[0]['name']]
+                    iframeWin.show(obj.data)
+                }
+            })
+        }
+
+
+    })
 </script>
 </html>

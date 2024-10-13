@@ -50,11 +50,7 @@
                 class="layui-icon layui-icon-edit"> 编辑</i>
         </button>
     {% endif %}
-    {% if authorize("system:role:power") %}
-        <button class="pear-btn pear-btn-warming pear-btn-sm" lay-event="power"><i
-                class="layui-icon layui-icon-vercode"> 授权</i>
-        </button>
-    {% endif %}
+
     {% if authorize("system:role:remove") %}
         <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i
                 class="layui-icon layui-icon-delete"> 删除</i>

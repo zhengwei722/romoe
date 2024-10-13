@@ -31,6 +31,7 @@ def data():
     username = str_escape(request.args.get('username', type=str))
     dept_id = request.args.get('deptId', type=int)
 
+
     filters = []
     if real_name:
         filters.append(User.realname.contains(real_name))
@@ -51,7 +52,9 @@ def data():
             'realname': user.realname,
             'enable': user.enable,
             'create_at': user.create_at,
-            'update_at': user.update_at
+            'update_at': user.update_at,
+            'balance':user.balance
+
 
         } for user in query.items],
         count=query.total)
@@ -126,9 +129,19 @@ def update():
     id = str_escape(req_json.get("userId"))
     username = str_escape(req_json.get('username'))
     real_name = str_escape(req_json.get('realName'))
+
+    password = str_escape(req_json.get('password'))
+    balance = str_escape(req_json.get('balance'))
+    if not a:
+        return fail_api(msg="数据不完整")
+
     role_ids = a.split(',')
-    User.query.filter_by(id=id).update({'username': username, 'realname': real_name})
+    User.query.filter_by(id=id).update({'username': username, 'realname': real_name,'balance':balance})
     u = User.query.filter_by(id=id).first()
+    if password:
+        u.set_password(password)
+        db.session.add(u)
+
     roles = Role.query.filter(Role.id.in_(role_ids)).all()
     u.role = roles
 
@@ -142,7 +155,7 @@ def update():
 def center():
     user_info = current_user
     user_logs = AdminLog.query.filter_by(url='/passport/login').filter_by(uid=current_user.id).order_by(
-        desc(AdminLog.create_time)).limit(10)
+        desc(AdminLog.starttime)).limit(10)
     return render_template('system/user/center.html', user_info=user_info, user_logs=user_logs)
 
 
@@ -171,7 +184,7 @@ def update_avatar():
 def update_info():
     req_json = request.get_json(force=True)
     r = User.query.filter_by(id=current_user.id).update(
-        {"realname": req_json.get("realName"), "remark": req_json.get("details")})
+        {"realname": req_json.get("realName")})
     db.session.commit()
     if not r:
         return fail_api(msg="出错啦")

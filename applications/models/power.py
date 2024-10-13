@@ -3,7 +3,7 @@ from applications.extensions import db
 
 
 class Power(db.Model):
-    __tablename__ = 'admin_power'
+    __tablename__ = 'power'
     id = db.Column(db.Integer, primary_key=True, comment='权限编号')
     name = db.Column(db.String(255), comment='权限名称')
     type = db.Column(db.String(1), comment='权限类型')

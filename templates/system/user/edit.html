@@ -32,7 +32,22 @@
                                class="layui-input">
                     </div>
                 </div>
-
+                <div class="layui-form-item">
+                    <label class="layui-form-label">密码</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="" name="password" lay-verify="title"
+                               autocomplete="off" placeholder="请输入新密码，不更新则不填"
+                               class="layui-input">
+                    </div>
+                </div>
+                            <div class="layui-form-item">
+                    <label class="layui-form-label">余额</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ user.balance }}" name="balance" lay-verify="title"
+                               autocomplete="off" placeholder="请输入标题"
+                               class="layui-input">
+                    </div>
+                </div>
 
 
                 <div class="layui-form-item">

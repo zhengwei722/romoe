@@ -18,7 +18,8 @@ from applications.config import cfg
 from sqlalchemy.exc import SQLAlchemyError
 from aiosmtplib.errors import SMTPDataError
 from applications.common.utils.redis import conn_redis_pool
-from applications.common.utils.jwt import token_required,create_jwt_token
+from applications.common.utils.jwt import token_required_decorator,create_jwt_token
+from applications.common.utils.logger import log_decorator
 bp = Blueprint('user', __name__, url_prefix='/user')
 
 '''
@@ -26,6 +27,7 @@ bp = Blueprint('user', __name__, url_prefix='/user')
 email:邮箱
 '''
 @bp.post('/get_email_code')
+@log_decorator
 def get_email_code():
     # 验证数据
     try:
@@ -36,9 +38,9 @@ def get_email_code():
 
         validate_email(email)
     except EmailNotValidError as e:
-        return CustomResponse(code=CustomStatus.EMAIL_FORMAT_MISALIGNMENT.value, msg="邮箱格式错误")
+        return CustomResponse(code=CustomStatus.EMAIL_FORMAT_MISALIGNMENT.value, msg="邮箱格式错误",data=str(e))
     except Exception as e:
-        return CustomResponse(code=CustomStatus.INCOMPLETE_DATA.value, msg="数据不完整")
+        return CustomResponse(code=CustomStatus.INCOMPLETE_DATA.value, msg="数据不完整",data=str(e))
     # 发送验证码
     try:
         email_code = f"{random.randint(0, 999999):06d}"
@@ -54,11 +56,11 @@ def get_email_code():
         flask_mail.send(msg)
         return CustomResponse(msg="发送成功")
     except SQLAlchemyError:
-        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误")
+        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误",data=str('SQLAlchemyError'))
     except SMTPDataError:
-        return CustomResponse(code=CustomStatus.OPERATE_DUPLICATE.value, msg="短时间内发送邮件次数过多，请稍后再试")
+        return CustomResponse(code=CustomStatus.OPERATE_DUPLICATE.value, msg="短时间内发送邮件次数过多，请稍后再试",data=str('SMTPDataError'))
     except Exception as e:
-        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg=str(e))
+        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误",data=str(e))
 
 
 '''
@@ -69,6 +71,7 @@ password:密码
 confirm_password:确认密码
 '''
 @bp.post('/register')
+@log_decorator
 def register():
     # 验证数据
     try:
@@ -85,11 +88,11 @@ def register():
         try:
             validate_email(email)
         except EmailNotValidError as e:
-            return CustomResponse(code=CustomStatus.EMAIL_FORMAT_MISALIGNMENT.value, msg="邮箱格式错误")
+            return CustomResponse(code=CustomStatus.EMAIL_FORMAT_MISALIGNMENT.value, msg="邮箱格式错误",data=str(e))
         if len(password) < 8:
             return CustomResponse(code=CustomStatus.PASSWORD_INSUFFICIENT_LENGTH.value, msg="密码长度必须至少为8个字符")
     except Exception as e:
-        return CustomResponse(code=CustomStatus.INCOMPLETE_DATA.value, msg="数据不完整")
+        return CustomResponse(code=CustomStatus.INCOMPLETE_DATA.value, msg="数据不完整",data=str(e))
     # 验证码
     try:
         redis_client = conn_redis_pool()
@@ -109,7 +112,7 @@ def register():
             return CustomResponse(code=CustomStatus.LOGIN_CODE_MISS.value, msg="验证码错误", data=data)
         redis_client.delete(f'email_code:{email}')
     except Exception as e:
-        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg=f"验证异常:{str(e)}")
+        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg=f"验证异常",data=str(e))
     # 保存用户数据
     try:
         user = User.query.filter_by(username=email).first()
@@ -117,18 +120,18 @@ def register():
             user.set_password(password)
             db.session.add(user)
             db.session.commit()
-            return CustomResponse(code=CustomStatus.PASSWORD_RESET_SUCCESS.value, msg="密码重置成功")
+            return CustomResponse(msg="密码重置成功")
         user = User(username=email, realname=email, enable=1)
         roles = Role.query.filter(Role.id.in_(['2'])).all()
         user.role = roles
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
-        return CustomResponse(code=201, msg="注册成功")
+        return CustomResponse(msg="注册成功")
     except SQLAlchemyError:
-        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误")
+        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误",data=str('SQLAlchemyError'))
     except Exception as e:
-        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误")
+        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误",data=str(e))
 
 '''
 登录接口
@@ -136,6 +139,7 @@ email:邮箱
 password:密码
 '''
 @bp.post('/login')
+@log_decorator
 def login():
     # 验证数据
     try:
@@ -146,11 +150,11 @@ def login():
         try:
             validate_email(email)
         except EmailNotValidError as e:
-            return CustomResponse(code=CustomStatus.EMAIL_FORMAT_MISALIGNMENT.value, msg="邮箱格式错误")
+            return CustomResponse(code=CustomStatus.EMAIL_FORMAT_MISALIGNMENT.value, msg="邮箱格式错误",data=str(e))
         if len(password) < 8:
             return CustomResponse(code=CustomStatus.PASSWORD_INSUFFICIENT_LENGTH.value, msg="密码长度必须至少为8个字符")
     except Exception as e:
-        return CustomResponse(code=CustomStatus.INCOMPLETE_DATA.value, msg="数据不完整")
+        return CustomResponse(code=CustomStatus.INCOMPLETE_DATA.value, msg="数据不完整",data=str(e))
     # 返回数据
     try:
         user = User.query.filter_by(username=email).first()
@@ -173,9 +177,9 @@ def login():
 
         }
 
-        return CustomResponse(code=CustomStatus.SUCCESS.value,msg='登录成功',data=data)
+        return CustomResponse(msg='登录成功',data=data)
     except SQLAlchemyError:
-        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误")
+        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误",data=str('SQLAlchemyError'))
     except Exception as e:
         return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg=f"服务端错误",data=str(e))
 
@@ -184,19 +188,21 @@ def login():
 email:邮箱
 '''
 @bp.post('/get_code')
+@log_decorator
 def get_code():
     email = request.json.get('email')
     redis_client = conn_redis_pool()
     login_code_info = redis_client.hgetall(f'email_code:{email}')
-    return {"data":login_code_info}
+    return CustomResponse(msg="获取验证码成功",data=login_code_info)
 
 '''
 鉴权案例
 '''
 @bp.post('/other')
-@token_required
+@token_required_decorator
+@log_decorator
 def other(userId):
-    user = User.query.filter_by(id=int(userId)).first()
+    user = User.query.filter_by(id=str(userId)).first()
 
     roles = user.role.all()
     data = {
@@ -206,4 +212,4 @@ def other(userId):
         # 其他需要返回的用户信息
         "roles":roles[0].name
     }
-    return {"data":data}
+    return CustomResponse(code=CustomStatus.PASSWORD_INSUFFICIENT_LENGTH.value, msg="suceefuol",data=data)

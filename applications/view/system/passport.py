@@ -2,7 +2,7 @@ from flask import Blueprint, session, redirect, url_for, render_template, reques
 from flask_login import current_user, login_user, login_required, logout_user
 
 from applications.common import admin as index_curd
-from applications.common.admin_log import login_log
+# from applications.common.admin_log import login_log,admin_log
 from applications.common.utils.http import fail_api, success_api
 from applications.models import User,Role
 
@@ -61,18 +61,18 @@ def login_post():
         # 登录
         login_user(user, remember=remember)
         # 记录登录日志
-        login_log(request, uid=user.id, is_access=True)
+        # admin_log(request,  is_access=True)
         # 授权路由存入session
         role = current_user.role
 
         user_power = []
-        for i in role:
-            if i.enable == 0:
-                continue
-            for p in i.power:
-                if p.enable == 0:
-                    continue
-                user_power.append(p.code)
+        # for i in role:
+        #     if i.enable == 0:
+        #         continue
+        #     for p in i.power:
+        #         if p.enable == 0:
+        #             continue
+        #         user_power.append(p.code)
         session['permissions'] = user_power
         # # 角色存入session
         # roles = []
@@ -81,7 +81,7 @@ def login_post():
         # session['role'] = [roles]
 
         return success_api(msg="登录成功")
-    login_log(request, uid=user.id, is_access=False)
+    # login_log(request, uid=user.id, is_access=False)
     return fail_api(msg="用户名或密码错误")
 
 

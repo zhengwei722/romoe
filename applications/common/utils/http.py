@@ -90,7 +90,5 @@ class CustomStatus(Enum):
     USERNAME_ALREADY_EXISTS = 5008
     # 密码长度不够Insufficient length
     PASSWORD_INSUFFICIENT_LENGTH = 5009
-    # 密码重置成功 Password reset successful
-    PASSWORD_RESET_SUCCESS = 5010
     # 身份验证失败
-    AUTHENTICATION_FAILED = 5011
+    AUTHENTICATION_FAILED = 5010

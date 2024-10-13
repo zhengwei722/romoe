@@ -39,7 +39,7 @@ def create_jwt_token(data):
 
 
 
-def token_required(f):
+def token_required_decorator(f):
     """
     一个装饰器，用于检查请求是否包含有效的 JWT 令牌。
     """

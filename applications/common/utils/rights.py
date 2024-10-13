@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import abort, request, jsonify, session, current_app
 from flask_login import login_required, current_user
-from applications.common.admin_log import admin_log
+# from applications.common.admin_log import admin_log
 
 
 def authorize(power: str, log: bool = False):
@@ -20,14 +20,14 @@ def authorize(power: str, log: bool = False):
             if current_user.username == current_app.config.get("SUPERADMIN"):
                 return func(*args, **kwargs)
             if not power in session.get('permissions'):
-                if log:
-                    admin_log(request=request, is_access=False)
+                # if log:
+                #     admin_log(request=request, is_access=False)
                 if request.method == 'GET':
                     abort(403)
                 else:
                     return jsonify(success=False, msg="权限不足!")
-            if log:
-                admin_log(request=request, is_access=True)
+            # if log:
+            #     admin_log(request=request, is_access=True)
             return func(*args, **kwargs)
 
         return wrapper

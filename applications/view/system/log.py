@@ -3,9 +3,10 @@ from sqlalchemy import desc
 from applications.common.utils.http import table_api
 from applications.common.utils.rights import authorize
 from applications.models import AdminLog
-from applications.schemas import LogOutSchema
+from applications.schemas import LogOutSchema,LogApiSchema
 from applications.common.curd import model_to_dicts
-
+from applications.common.utils.validate import str_escape
+from applications.extensions import db
 bp = Blueprint('log', __name__, url_prefix='/log')
 
 
@@ -16,25 +17,43 @@ def index():
     return render_template('system/admin_log/main.html')
 
 
-# 登录日志
-@bp.get('/loginLog')
+# API日志
+@bp.get('/apiLog')
 @authorize("system:log:main")
-def login_log():
-    # orm查询
-    # 使用分页获取data需要.items
-    log = AdminLog.query.filter_by(url='/passport/login').order_by(desc(AdminLog.create_time)).layui_paginate()
+def Api_log():
+    date = str_escape(request.args.get('date', type=str))
+    status = str_escape(request.args.get('status', type=str))
+
+    filters = []
+    if date:
+        filters.append(AdminLog.starttime.like(f"{date}%"))
+    if status:
+        filters.append(AdminLog.success == int(status))
+
+
+    log = db.session.query(
+        AdminLog
+    ).filter(*filters).order_by(desc(AdminLog.starttime)).layui_paginate()
+
     count = log.total
-    return table_api(data= model_to_dicts(schema=LogOutSchema, data=log.items), count=count)
+
+    return table_api(data= model_to_dicts(schema=LogApiSchema, data=log.items), count=count)
+
 
 
 # 操作日志
-@bp.get('/operateLog')
-@authorize("system:log:main")
-def operate_log():
-    # orm查询
-    # 使用分页获取data需要.items
-    log = AdminLog.query.filter(
-        AdminLog.url != '/passport/login').order_by(
-        desc(AdminLog.create_time)).layui_paginate()
-    count = log.total
-    return table_api(data=model_to_dicts(schema=LogOutSchema, data=log.items), count=count)
+# @bp.get('/systemLog')
+# @authorize("system:log:main")
+# def operate_log():
+#     date = str_escape(request.args.get('date', type=str))
+#     filters = []
+#     if date:
+#         filters.append(AdminLog.method.contains(date))
+#     filters.append(AdminLog.url != '/system/passport/login')
+#     log = db.session.query(
+#         AdminLog
+#     ).filter(*filters).layui_paginate()
+#
+#     count = log.total
+#     return table_api(data=model_to_dicts(schema=LogOutSchema, data=log.items), count=count)
+

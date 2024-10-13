@@ -31,26 +31,36 @@ def login_log(request, uid, is_access):
     return log.id
 
 
-def admin_log(request, is_access):
-    request_data = request.json if request.headers.get('Content-Type') == 'application/json' else request.values
+def api_log(request, start_time,end_time,total_time,response_dict, user_id,tips,is_access):
+    try:
+        request_data = request.json if request.headers.get('Content-Type') == 'application/json' else request.values
+    except:
+        request_data = {}
+
     info = {
         'method': request.method,
+        'uid':user_id,
         'url': request.path,
-        'ip': request.remote_addr,
-        'user_agent': str_escape(request.headers.get('User-Agent')),
-        'desc': str_escape(str(dict(request_data))),
-        'uid': current_user.id,
-        'success': int(is_access)
+        'request_body': str_escape(str(dict(request_data))),
+        'response':str_escape(str(response_dict)),
+        'start_time': start_time,
+        'end_time': end_time,
+        'total_time': total_time,
+        'success': int(is_access),
+        'tips':tips
 
     }
     log = AdminLog(
-        url=info.get('url'),
-        ip=info.get('ip'),
-        user_agent=info.get('user_agent'),
-        desc=info.get('desc'),
-        uid=info.get('uid'),
         method=info.get('method'),
-        success=info.get('success')
+        uid=info.get('uid'),
+        url=info.get('url'),
+        request_body=info.get('request_body'),
+        response_body=info.get('response'),
+        starttime=info.get('start_time'),
+        endtime=info.get('end_time'),
+        totaltime=info.get('total_time'),
+        success=info.get('success'),
+        tips=info.get('tips')
     )
     db.session.add(log)
     db.session.commit()

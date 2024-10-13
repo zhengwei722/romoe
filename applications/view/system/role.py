@@ -63,51 +63,51 @@ def save():
 
 
 # 角色授权
-@bp.get('/power/<int:_id>')
-@authorize("system:role:power", log=True)
-def power(_id):
-    return render_template('system/role/power.html', id=_id)
+# @bp.get('/power/<int:_id>')
+# @authorize("system:role:power", log=True)
+# def power(_id):
+#     return render_template('system/role/power.html', id=_id)
 
 
 # 获取角色权限
-@bp.get('/getRolePower/<int:id>')
-@authorize("system:role:main", log=True)
-def get_role_power(id):
-    role = Role.query.filter_by(id=id).first()
-    check_powers = role.power
-    check_powers_list = []
-    for cp in check_powers:
-        check_powers_list.append(cp.id)
-    powers = Power.query.all()
-    power_schema = PowerOutSchema2(many=True)  # 用已继承ma.ModelSchema类的自定制类生成序列化类
-    output = power_schema.dump(powers)  # 生成可序列化对象
-    for i in output:
-        if int(i.get("powerId")) in check_powers_list:
-            i["checkArr"] = "1"
-        else:
-            i["checkArr"] = "0"
-    res = {
-        "data": output,
-        "status": {"code": 200, "message": "默认"}
-    }
-    return jsonify(res)
-
-
-# 保存角色权限
-@bp.put('/saveRolePower')
-@authorize("system:role:edit", log=True)
-def save_role_power():
-    req_form = request.form
-    power_ids = req_form.get("powerIds")
-    power_list = power_ids.split(',')
-    role_id = req_form.get("roleId")
-    role = Role.query.filter_by(id=role_id).first()
-
-    powers = Power.query.filter(Power.id.in_(power_list)).all()
-    role.power = powers
-
-    db.session.commit()
-    return success_api(msg="授权成功")
+# @bp.get('/getRolePower/<int:id>')
+# @authorize("system:role:main", log=True)
+# def get_role_power(id):
+#     role = Role.query.filter_by(id=id).first()
+#     check_powers = role.power
+#     check_powers_list = []
+#     for cp in check_powers:
+#         check_powers_list.append(cp.id)
+#     powers = Power.query.all()
+#     power_schema = PowerOutSchema2(many=True)  # 用已继承ma.ModelSchema类的自定制类生成序列化类
+#     output = power_schema.dump(powers)  # 生成可序列化对象
+#     for i in output:
+#         if int(i.get("powerId")) in check_powers_list:
+#             i["checkArr"] = "1"
+#         else:
+#             i["checkArr"] = "0"
+#     res = {
+#         "data": output,
+#         "status": {"code": 200, "message": "默认"}
+#     }
+#     return jsonify(res)
+#
+#
+# # 保存角色权限
+# @bp.put('/saveRolePower')
+# @authorize("system:role:edit", log=True)
+# def save_role_power():
+#     req_form = request.form
+#     power_ids = req_form.get("powerIds")
+#     power_list = power_ids.split(',')
+#     role_id = req_form.get("roleId")
+#     role = Role.query.filter_by(id=role_id).first()
+#
+#     powers = Power.query.filter(Power.id.in_(power_list)).all()
+#     role.power = powers
+#
+#     db.session.commit()
+#     return success_api(msg="授权成功")
 
 
 # 角色编辑
