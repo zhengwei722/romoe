@@ -20,6 +20,7 @@ from aiosmtplib.errors import SMTPDataError
 from applications.common.utils.redis import conn_redis_pool
 from applications.common.utils.jwt import token_required_decorator,create_jwt_token
 from applications.common.utils.logger import log_decorator
+import uuid
 bp = Blueprint('user', __name__, url_prefix='/user')
 
 '''
@@ -121,7 +122,8 @@ def register():
             db.session.add(user)
             db.session.commit()
             return CustomResponse(msg="密码重置成功")
-        user = User(username=email, realname=email, enable=1)
+        realname = '用户' + str(uuid.uuid4())[:8]
+        user = User(username=email, realname=realname, enable=1)
         roles = Role.query.filter(Role.id.in_(['2'])).all()
         user.role = roles
         user.set_password(password)
@@ -199,8 +201,8 @@ def get_code():
 鉴权案例
 '''
 @bp.post('/other')
-@token_required_decorator
 @log_decorator
+@token_required_decorator
 def other(userId):
     user = User.query.filter_by(id=str(userId)).first()
 
@@ -212,4 +214,4 @@ def other(userId):
         # 其他需要返回的用户信息
         "roles":roles[0].name
     }
-    return CustomResponse(code=CustomStatus.PASSWORD_INSUFFICIENT_LENGTH.value, msg="suceefuol",data=data)
+    return CustomResponse(code=CustomStatus.PASSWORD_INSUFFICIENT_LENGTH.value, msg="success",data=data)
