@@ -91,6 +91,19 @@ powerdata = [
         enable=1,
 
     ), Power(
+        id=31,
+        name='用户管理',
+        type='1',
+        code='system:appmodel:main',
+        url='/system/appmodel/',
+        open_type='_iframe',
+        parent_id='1',
+        icon='layui-icon layui-icon layui-icon layui-icon layui-icon-rate',
+        sort=1,
+        create_time=now_time,
+        enable=1,
+
+    ), Power(
         id=4,
         name='权限管理',
         type='1',
