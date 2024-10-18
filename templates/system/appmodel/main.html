@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>用户管理</title>
+    <title>模型管理</title>
+    <title>模型管理</title>
     {% include 'system/common/header.html' %}
     <link rel="stylesheet" href="{{ url_for('static', filename='system/admin/css/other/user.css') }}"/>
 </head>
@@ -184,7 +185,7 @@
         }
 
         window.remove = function (obj) {
-            layer.confirm('确定要删除该用户', {icon: 3, title: '提示'}, function (index) {
+            layer.confirm('确定要删除该模型', {icon: 3, title: '提示'}, function (index) {
                 layer.close(index)
                 let loading = layer.load()
                 $.ajax({

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>用户管理</title>
+    <title>模型管理</title>
     {% include 'system/common/header.html' %}
 </head>
 <body>
@@ -10,34 +10,28 @@
         <div class="main-container">
             <div class="main-container">
                 <div class="layui-form-item">
-                    <label class="layui-form-label">账号</label>
+                    <label class="layui-form-label">模型名称</label>
                     <div class="layui-input-block">
-                        <input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+                        <input type="text" name="modelName" lay-verify="title" autocomplete="off" placeholder="请输入标题"
                                class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">姓名</label>
+                    <label class="layui-form-label">模型ID</label>
                     <div class="layui-input-block">
-                        <input type="text" name="realName" lay-verify="title" autocomplete="off" placeholder="请输入标题"
-                               class="layui-input">
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label">密码</label>
-                    <div class="layui-input-block">
-                        <input type="text" name="password" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+                        <input type="text" name="modelId" lay-verify="title" autocomplete="off" placeholder="请输入标题"
                                class="layui-input">
                     </div>
                 </div>
 
+
                 <div class="layui-form-item">
-                    <label class="layui-form-label">角色</label>
+                    <label class="layui-form-label">访问权限</label>
                     <div class="layui-input-block">
 
                         {% for role in roles %}
                             <input
-                                    value="{{ role.id }}" title="{{ role.name }}" type="checkbox"
+                                    value="{{ role.id }}" title="{{ role.name }}" type="radio"
                                     name="roleIds" lay-skin="primary">
                         {% endfor %}
 
@@ -65,15 +59,15 @@
     let form = layui.form
     let $ = layui.jquery
     form.on('submit(user-save)', function (data) {
-      let roleIds = ''
-      $('input[type=checkbox]:checked').each(function () {
-        roleIds += $(this).val() + ','
+
+      $('input[type=radio]:checked').each(function () {
+        roleId = $(this).val();
       })
-      roleIds = roleIds.substr(0, roleIds.length - 1)
-      data.field.roleIds = roleIds
+
+      data.field.roleIds = roleId
 
       $.ajax({
-        url: '/system/user/save',
+        url: '/system/appmodel/save',
         data: JSON.stringify(data.field),
         dataType: 'json',
         contentType: 'application/json',

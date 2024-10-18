@@ -10,7 +10,7 @@ from applications.common.utils.validate import str_escape
 from applications.extensions import db
 from applications.models import Role
 from applications.models import User, AdminLog
-
+import pytz
 bp = Blueprint('user', __name__, url_prefix='/user')
 
 
@@ -44,15 +44,15 @@ def data():
     query = db.session.query(
         User
     ).filter(*filters).layui_paginate()
-
     return table_api(
         data=[{
             'id': user.id,
             'username': user.username,
             'realname': user.realname,
             'enable': user.enable,
-            'create_at': user.create_at,
-            'update_at': user.update_at,
+            'role': [role.name for role in user.role][0],
+            'create_at': user.create_at.astimezone(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S'),
+            'update_at': user.update_at.astimezone(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S'),
             'balance':user.balance
 
 
@@ -117,6 +117,7 @@ def edit(id):
     checked_roles = []
     for r in user.role:
         checked_roles.append(r.id)
+    print(checked_roles)
     return render_template('system/user/edit.html', user=user, roles=roles, checked_roles=checked_roles)
 
 

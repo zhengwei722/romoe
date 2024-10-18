@@ -30,17 +30,6 @@ userdata = [
         balance=0.0
 
     ),
-    User(
-        id='3',
-        username='wind',
-        password_hash='pbkdf2:sha256:150000$skME1obT$6a2c20cd29f89d7d2f21d9e373a7e3445f70ebce3ef1c3a555e42a7d17170b37',
-        create_at=now_time,
-        enable=1,
-        realname='风',
-        avatar='/static/system/admin/images/avatar.jpg',
-        balance=0.0
-
-    ),
 ]
 roledata = [
     Role(
@@ -92,14 +81,14 @@ powerdata = [
 
     ), Power(
         id=31,
-        name='用户管理',
+        name='模型管理',
         type='1',
         code='system:appmodel:main',
         url='/system/appmodel/',
         open_type='_iframe',
         parent_id='1',
         icon='layui-icon layui-icon layui-icon layui-icon layui-icon-rate',
-        sort=1,
+        sort=2,
         create_time=now_time,
         enable=1,
 

@@ -10,7 +10,7 @@ from applications.common.utils.validate import str_escape
 from applications.extensions import db
 from applications.models import Role
 from applications.models import User, AdminLog,Appmodel
-
+import pytz
 bp = Blueprint('appmodel', __name__, url_prefix='/appmodel')
 
 
@@ -37,9 +37,9 @@ def data():
             'model_name': appmodel.model_name,
             'model_id': appmodel.model_id,
             'enable': appmodel.enable,
-            'access_level': appmodel.access_level,
-            'create_at': appmodel.create_at,
-            'update_at':appmodel.update_at
+            'access_level': appmodel.access_level.name,
+            'create_at': appmodel.create_at.astimezone(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S'),
+            'update_at':appmodel.update_at.astimezone(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S')
 
 
         } for appmodel in query.items],
@@ -59,23 +59,15 @@ def add():
 @authorize("system:appmodel:add", log=True)
 def save():
     req_json = request.get_json(force=True)
-    a = req_json.get("roleIds")
-    username = str_escape(req_json.get('username'))
-    real_name = str_escape(req_json.get('realName'))
-    password = str_escape(req_json.get('password'))
-    role_ids = a.split(',')
-
-    if not username or not real_name or not password:
-        return fail_api(msg="账号姓名密码不得为空")
-
-    if bool(User.query.filter_by(username=username).count()):
-        return fail_api(msg="用户已经存在")
-    user = User(username=username, realname=real_name,enable=1)
-    user.set_password(password)
-    db.session.add(user)
-    roles = Role.query.filter(Role.id.in_(role_ids)).all()
-    for r in roles:
-        user.role.append(r)
+    roleIds = req_json.get("roleIds")
+    modelName = str_escape(req_json.get('modelName'))
+    modelId = str_escape(req_json.get('modelId'))
+    if not roleIds or not modelName or not modelId:
+        return fail_api(msg="模型名称，ID，权限不得为空")
+    if bool(Appmodel.query.filter_by(model_name=modelName).count()):
+        return fail_api(msg="模型已经存在")
+    appmodel = Appmodel(model_name=modelName, model_id=modelId,access_level_id=roleIds,enable=1)
+    db.session.add(appmodel)
     db.session.commit()
     return success_api(msg="增加成功")
 
@@ -84,12 +76,9 @@ def save():
 @bp.delete('/remove/<int:id>')
 @authorize("system:appmodel:remove", log=True)
 def delete(id):
-    user = User.query.filter_by(id=id).first()
-    user.role = []
-
-    res = User.query.filter_by(id=id).delete()
+    appmodel = Appmodel.query.filter_by(id=id).delete()
     db.session.commit()
-    if not res:
+    if not appmodel:
         return fail_api(msg="删除失败")
     return success_api(msg="删除成功")
 
@@ -98,12 +87,13 @@ def delete(id):
 @bp.get('/edit/<int:id>')
 @authorize("system:appmodel:edit", log=True)
 def edit(id):
-    user = curd.get_one_by_id(User, id)
+    appmodel = curd.get_one_by_id(Appmodel, id)
     roles = Role.query.all()
     checked_roles = []
-    for r in user.role:
-        checked_roles.append(r.id)
-    return render_template('system/appmodel/edit.html', user=user, roles=roles, checked_roles=checked_roles)
+
+    checked_roles.append(appmodel.access_level_id)
+    print(checked_roles)
+    return render_template('system/appmodel/edit.html', appmodel=appmodel, roles=roles,checked_roles=checked_roles)
 
 
 #  编辑用户
@@ -111,26 +101,26 @@ def edit(id):
 @authorize("system:appmodel:edit", log=True)
 def update():
     req_json = request.get_json(force=True)
-    a = str_escape(req_json.get("roleIds"))
-    id = str_escape(req_json.get("userId"))
-    username = str_escape(req_json.get('username'))
-    real_name = str_escape(req_json.get('realName'))
+    roleIds = str_escape(req_json.get("roleIds"))
+    appmodelId = str_escape(req_json.get("appmodelId"))
+    model_name = str_escape(req_json.get('model_name'))
+    model_id = str_escape(req_json.get('model_id'))
+    print(roleIds,appmodelId,model_id,model_name)
 
-    password = str_escape(req_json.get('password'))
-    balance = str_escape(req_json.get('balance'))
-    if not a:
-        return fail_api(msg="数据不完整")
+    if not roleIds or not appmodelId or not model_name or not model_id:
+        return fail_api(msg="模型名称，ID，权限不得为空")
 
-    role_ids = a.split(',')
-    User.query.filter_by(id=id).update({'username': username, 'realname': real_name,'balance':balance})
-    u = User.query.filter_by(id=id).first()
-    if password:
-        u.set_password(password)
-        db.session.add(u)
-
-    roles = Role.query.filter(Role.id.in_(role_ids)).all()
-    u.role = roles
-
+    # if roleIds:
+    #     return fail_api(msg="数据不完整")
+    #
+    #
+    Appmodel.query.filter_by(id=appmodelId).update({'model_name': model_name, 'model_id': model_id,'access_level_id':roleIds})
+    # u = User.query.filter_by(id=id).first()
+    #
+    #
+    # roles = Role.query.filter(Role.id.in_(role_ids)).all()
+    # u.role = roles
+    #
     db.session.commit()
     return success_api(msg="更新成功")
 
@@ -144,7 +134,7 @@ def update():
 def enable():
     _id = request.get_json(force=True).get('userId')
     if _id:
-        res = enable_status(model=User, id=_id)
+        res = enable_status(model=Appmodel, id=_id)
         if not res:
             return fail_api(msg="出错啦")
         return success_api(msg="启动成功")
@@ -157,7 +147,7 @@ def enable():
 def dis_enable():
     _id = request.get_json(force=True).get('userId')
     if _id:
-        res = disable_status(model=User, id=_id)
+        res = disable_status(model=Appmodel, id=_id)
         if not res:
             return fail_api(msg="出错啦")
         return success_api(msg="禁用成功")

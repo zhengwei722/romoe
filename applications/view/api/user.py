@@ -170,7 +170,7 @@ def login():
         # 获取token
         tokenData = {"userId": user.id}
         token = create_jwt_token(tokenData)
-        role_names = [role.name for role in user.role]
+        role_names = [role.name for role in user.role][0]
 
         data = {
             'id': user.id,

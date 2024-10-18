@@ -26,7 +26,7 @@ def table_api(msg: str = "", count=0, data=None, limit=10):
 def CustomResponse(data=None, code=200, msg=""):
     # 如果没有提供data或者data为False，只返回msg和code
     if data is None or data == {} or data == []:
-        res = {'msg': msg, 'code': code}
+        res = {'msg': msg, 'code': code,'data': {}}
     else:
         res = {'msg': msg, 'code': code, 'data': data}
     return jsonify(res)
