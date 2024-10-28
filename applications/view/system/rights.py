@@ -146,9 +146,11 @@ def menu():
             else:
                 menu_dict[_dict['parent_id']].append(_dict)
         return jsonify(sorted(menu_dict.get(0), key=lambda item: item['sort']))
-
+from applications.models import User, AdminLog
 # 控制台页面
 @bp.get('/welcome')
 @login_required
 def welcome():
+    user_number = User.query.count()
+    print(user_number)
     return render_template('system/console/console.html')

@@ -123,7 +123,8 @@ def register():
             db.session.commit()
             return CustomResponse(msg="密码重置成功")
         realname = '用户' + str(uuid.uuid4())[:8]
-        user = User(username=email, realname=realname, enable=1)
+        avatar = f'https://q2.qlogo.cn/headimg_dl?dst_uin={email}&spec=640'
+        user = User(username=email, realname=realname, enable=1,avatar=avatar)
         roles = Role.query.filter(Role.id.in_(['2'])).all()
         user.role = roles
         user.set_password(password)
@@ -177,7 +178,8 @@ def login():
             'username': user.username,
             "realname": user.realname,
             "token":token,
-            'role_names':role_names
+            'role_names':role_names,
+            'avatar':user.avatar,
 
         }
 
@@ -203,8 +205,8 @@ def get_code():
 鉴权案例
 '''
 @bp.post('/other')
-@log_decorator
 @token_required_decorator
+@log_decorator
 def other(userId):
     user = User.query.filter_by(id=str(userId)).first()
 

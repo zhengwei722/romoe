@@ -31,7 +31,7 @@ def create_jwt_token(data):
     data.update({"client_key": client_key})
     # 将用户id存入redis
     redis_client = conn_redis_pool()
-    redis_client.setex(f"session:{session_key}", ACCESS_TOKEN_EXPIRE_MINUTES, client_key)
+    redis_client.setex(f"auth_token:{session_key}", ACCESS_TOKEN_EXPIRE_MINUTES, client_key)
     # 进行jwt加密
     token = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
     return token
@@ -59,11 +59,11 @@ def token_required_decorator(f):
             # 判断redis内是否存在该token
             redis_client = conn_redis_pool()
             session_key = hashlib.sha256((str(userId) + cfg["SESSION_SALT"]).encode()).hexdigest()
-            client_key = redis_client.get(f"session:{session_key}")
+            client_key = redis_client.get(f"auth_token:{session_key}")
             if not client_key or client_key != data.get("client_key"):
                 api_log(request, datetime.now(), datetime.now(), '0.00', {}, None, '令牌无效',is_access=True)
                 return CustomResponse(code=CustomStatus.TOKEN_INVALID.value, msg=f"令牌无效")
-            redis_client.expire(f"session:{session_key}", ACCESS_TOKEN_EXPIRE_MINUTES)
+            redis_client.expire(f"auth_token:{session_key}", ACCESS_TOKEN_EXPIRE_MINUTES)
         except:
             # 如果令牌无效或过期，返回错误响应
             api_log(request, datetime.now(), datetime.now(), '0.00', {}, None, '令牌无效', is_access=True)

@@ -6,7 +6,7 @@ SYSTEM_VERSION = '1.0.0'
 UPLOADED_PHOTOS_DEST = 'static/upload'
 SECRET_KEY = "GiKDzmkgUyvAGqc3rIoukOx4bYpXTrb9tyYXzIHUhtA"
 # redis配置
-REDIS_HOST = "38.12.33.185"
+REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 REDIS_PASSWORD = 'difyai123456'
 REDIS_DB = 15

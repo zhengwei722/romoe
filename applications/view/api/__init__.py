@@ -1,13 +1,16 @@
 from flask import Flask, Blueprint
-
-
+from applications.common.utils.http import CustomResponse ,CustomStatus
 from applications.view.api.user import bp as user_bp
 from applications.view.api.knowledge import bp as knowledge_bp
 from applications.view.api.appmodel import bp as appmodel_bp
-
+from applications.config import cfg
 
 # 创建sys
 api_bp = Blueprint('api', __name__, url_prefix='/api')
+
+@api_bp.get('/version')
+def version():
+    return CustomResponse(msg="查询成功",data={"welcome": "Romoe OpenAPI",'version': cfg['SYSTEM_VERSION']})
 
 
 def register_api_bps(app: Flask):

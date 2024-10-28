@@ -27,8 +27,8 @@ bp = Blueprint('knowledge', __name__, url_prefix='/knowledge')
 
 
 @bp.post('/create')
-@log_decorator
 @token_required_decorator
+@log_decorator
 def create(userId):
     try:
         knowledgeName = request.json.get('knowledgeName')
@@ -68,8 +68,8 @@ def create(userId):
         return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误",data=str(e))
 
 @bp.get('/list')
-@log_decorator
 @token_required_decorator
+@log_decorator
 def list(userId):
     try:
         knowledge_list = Knowledge.query.filter_by(uid=userId).all()
@@ -85,8 +85,8 @@ def list(userId):
 
 
 @bp.delete('/delete')
-@log_decorator
 @token_required_decorator
+@log_decorator
 def delete(userId):
     try:
         knowledgeId = request.json.get('knowledgeId')
@@ -111,7 +111,8 @@ def delete(userId):
         url = cfg['DIFY_URL']+'/datasets/'+str(knowledgeId)
         response = requests.request("DELETE", url, headers=headers)
         #
-        # if response.status_code == 200:
+        if response.status_code != 200:
+            return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误")
         res = Knowledge.query.filter_by(knowledgeId=knowledgeId).delete()
         db.session.commit()
 

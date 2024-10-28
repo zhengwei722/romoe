@@ -1,40 +1,56 @@
-from flask import Flask, Response, stream_with_context
-import time
-import requests
-app = Flask(__name__)
+# from flask import Flask, Response, stream_with_context
+# import time
+# import requests
+# app = Flask(__name__)
+#
+# @app.route('/stream')
+# def stream():
+#     def generate():
+#         try:
+#             for i in range(10):
+#                 time.sleep(1)  # 模拟耗时操作
+#                 yield f'data: {i}\n'
+#         except Exception as e:
+#             yield f'An error occurred: {e}\n'
+#
+#     return Response(stream_with_context(generate()), status=200, mimetype='text/event-stream')
+#
+# @app.route('/stream1')
+# def stream_data():
+#     def generate():
+#         # 请求接口 A
+#         try:
+#             response = requests.get('http://127.0.0.1:5000/stream', stream=True)
+#             response.raise_for_status()  # 确保请求成功
+#
+#             # 流式读取接口 A 的响应内容
+#             for chunk in response.iter_lines(decode_unicode=True):
+#                 print(chunk)
+#                 if chunk:  # 过滤掉 keep-alive 新行
+#                     yield chunk
+#
+#         except requests.exceptions.RequestException as e:
+#             # 处理请求异常
+#             yield str(e)
+#
+#     # 创建流式响应
+#     return Response(stream_with_context(generate()), status=200, mimetype='text/event-stream')
+#
+# if __name__ == '__main__':
+#     app.run(debug=True)
 
-@app.route('/stream')
-def stream():
-    def generate():
-        try:
-            for i in range(10):
-                time.sleep(1)  # 模拟耗时操作
-                yield f'data: {i}\n'
-        except Exception as e:
-            yield f'An error occurred: {e}\n'
 
-    return Response(stream_with_context(generate()), status=200, mimetype='text/event-stream')
-
-@app.route('/stream1')
-def stream_data():
-    def generate():
-        # 请求接口 A
-        try:
-            response = requests.get('http://127.0.0.1:5000/stream', stream=True)
-            response.raise_for_status()  # 确保请求成功
-
-            # 流式读取接口 A 的响应内容
-            for chunk in response.iter_lines(decode_unicode=True):
-                print(chunk)
-                if chunk:  # 过滤掉 keep-alive 新行
-                    yield chunk
-
-        except requests.exceptions.RequestException as e:
-            # 处理请求异常
-            yield str(e)
-
-    # 创建流式响应
-    return Response(stream_with_context(generate()), status=200, mimetype='text/event-stream')
-
-if __name__ == '__main__':
-    app.run(debug=True)
+a = {
+  "result": "阿里1688  \n找货源  \n找工厂  \n找工业品  \n阿里巴巴搜索  \n1688官方浏览器插件来啦！  \n全网货源 一键比价  \n快速补货  \n卡券中心  \n进货单  \n反馈  \n会员中心  \n品类市场  \n女装  \n男装  \n内衣  \n配饰  \n鞋靴  \n箱包  \n运动服饰  \n运动装备  \n童装  \n母婴  \n玩具  \n家居百货  \n家纺家饰  \n家装建材  \n灯饰照明  \n办公文教  \n宠物园艺  \n食品酒水  \n餐饮生鲜  \n美容化妆  \n个护家清  \n数码  \n家电  \n汽车用品  \n逛市场  \n商人社区  \n找新品  \n淘卖专供  \n1688PLUS  \n跨境专供  \n金牌制造  \n严选好物  \n下午好，欢迎来到1688  \n填写我的采购需求  \n一键登录  \n免费注册  \n平台公告  \n最新规则  \n商人社区  \n新品直播  \n直播中  \n足不出户 采一手新品  \n更多  \n厂货直播  \n源头新品每日上新  \n新品直播  \n每日上新1000+  \n淘卖专供  \n同行热卖 源头厂价  \n夏季大码撞色新款连衣裙  \n新款学生宴会气质晚礼服  \n夏季新款大码连衣裙  阿里巴巴1688.com是全球领先的采购批发平台，致力于为企业提供高效的批发交易服务。平台汇集了大量供应商与采购商，提供多种商品类别，涵盖了从原材料到成品的广泛选择。用户可以通过搜索功能快速找到所需商品，并与供应商直接沟通，获取报价和详细信息。此外，1688.com还提供了安全的支付方式和物流服务，保障交易的顺利进行。该平台的目标是促进国内外贸易，帮助企业实现高效采购。阿里巴巴集团介绍\n\n关于我们\n\n二十多年的发展史也是不断突破的创新史\n\n使命  \n让天下没有难做的生意。\n\n愿景  \n追求成为一家活102年的好公司。我们的愿景是让客户相会、工作和生活在阿里巴巴。\n\n价值观  \n客户第一，员工第二，股东第三  \n因为信任，所以简单  \n唯一不变的是变化  \n今天最好的表现是明天最低的要求  \n此时此刻，非我莫属  \n认真生活，快乐工作  \n\n里程碑  \n二月  \n阿里巴巴集团扩大股份回购计划250亿美元，持续提升股东回报。  \n三月  \n速卖通推出Choice服务一周年，通过“全托管”模式，Choice让商家专注于供应链管理，降低零售商业营运门槛。  \n五月  \n阿里巴巴杭州园区西溪C区启用，秉承“绿色、科技、可持续”的设计理念，推行绿色低碳的工作方式。阿里巴巴北京园区亦同日启用。  \n五月  \n阿里巴巴宣布派发2024财年年度股息及一次性特别股息，总额约40亿美元。  \n五月  \n阿里巴巴通过可转换优先票据募集50亿美元，支持股份回购计划。  \n六月  \n阿里云发布通义千问大型语言模型Qwen2系列，不仅改善安全性对齐，而且提升性能表现和多语言能力。  \n六月  \n阿里巴巴成功举办淘宝天猫618购物节，其线上GMV同比实现强劲增长。  \n七月  \n2024 年巴黎奥运会上，阿里云的技术通过云基础设施实现远程视频制作和传输，在奥运史上首次代替卫星成为主要的传输方式。  \n八月  \n阿里巴巴完成将其于香港联交所第二上市地位变更为主要上市地位的自愿转换，成为于香港联交所及纽约证券交易所双重主要上市的公司。  \n\n领导团队  \n蔡崇信  \n主席  \n吴泳铭  \n董事兼首席执行官  \nJ. MICHAEL EVANS  \n董事兼总裁  \n武卫  \n董事  \n徐宏  \n首席财务官  \n蒋芳  \n首席人才官  \n俞思瑛  \n首席法务官  \n蒋凡  \n阿里国际数字商业集团首席执行官  \n万霖  \n菜鸟集团首席执行官  \n樊路远  \n大文娱集团首席执行官  BABA 股票信息：\n- 股票代码：NYSE:BABA\n- 公司名称：Alibaba Group Holding\n- 当前交易数据：\n  - 当前价格：@hourTradingPrice@\n  - 价格变化：@hourTradingChange@ (@hourTradingChangeP@%)\n  - 交易量：@hourTradingVolume@\n  - 更新时间：@hourTradingDateTime@\n\n财务数据：\n- 市盈率 (PE)：@pe@\n- 总股份：@totalShare@\n- 每股收益 (EPS)：@eps@\n- 股息：@dividend@/@income@\n\n市场表现：\n- 52周最低价：@low52@\n- 52周最高价：@high52@\n- 当前价格与52周最低/最高价比较：@low@-@high@\n\n重要公告：\n- Alibaba Group Holding 公布了其 Q3 财报，显示出一定的增长。\n- 公司高管的变动及其对业务的影响。\n- 市场分析师对 Alibaba 的未来展望。\n\n以上信息均与 Alibaba 相关，包含股票交易、财务数据和市场表现等关键信息。阿里巴巴集团控股有限公司（简称：阿里巴巴集团），2024财年收入9411.68亿元，同比增长8%。是以曾担任英语教师的马云为首的18人于1999年在浙江省杭州市创立的公司。阿里巴巴集团经营多项业务，另外也从关联公司的业务和服务中取得经营商业生态系统上的支援。业务和关联公司的业务包括：淘宝网、天猫、聚划算、全球速卖通、阿里巴巴国际交易市场、1688、阿里妈妈、阿里云、蚂蚁金服、菜鸟网络等。\n\n2014年9月19日，阿里巴巴集团在纽约证券交易所挂牌上市，创造了史上最大IPO记录，股票代码“BABA”，创始人为马云。2019年9月6日，阿里巴巴集团宣布20亿美元全资收购网易考拉，领投网易云音乐7亿美元融资。10月，2019福布斯全球数字经济100强榜位列10位。11月16日，胡润研究院发布《2019胡润全球独角兽活跃投资机构百强榜》，阿里巴巴排名第7位。11月26日，阿里巴巴港股上市，总市值超4万亿，登顶港股成为港股“新股王”。12月，阿里巴巴集团入选2019中国品牌强国盛典榜样100品牌。\n\n2020年1月11日，阿里巴巴宣布其成为鼠年春晚独家电商合作伙伴，并提供电商补贴。2023年12月29日，北京市高级人民法院对阿里巴巴集团控股有限公司“二选一”案作出一审判决，认定其滥用市场支配地位实施“二选一”的垄断行为成立，对京东造成严重损害，并判决向京东赔偿10亿元。2024年5月10日，阿里巴巴全球总部（西溪C区）正式投入使用，阿里北京朝阳科技园启用。\n\n公司名称：阿里巴巴集团控股有限公司，外文名：Alibaba Group Holding Limited，成立时间：1999年6月28日，年营业额：131337.9万美元（2023年），创始人：马云，董事长：蔡崇信，注册地：开曼群岛，办公地址：香港铜锣湾勿地臣街1号时代广场1座26楼，浙江省杭州市余杭区文一西路969号，股票代码：BABA，CEO：吴泳铭。\n\n阿里巴巴集团的业务板块包括电子商务服务、蚂蚁金融服务、菜鸟物流服务、大数据云计算服务、广告服务、跨境贸易服务等。阿里巴巴国际交易市场是阿里巴巴集团最先创立的业务，是领先的全球批发贸易平台，买家来自全球200多个国家和地区。阿里云是阿里巴巴集团旗下的云计算业务，向全球用户提供一整套云计算服务。蚂蚁金融服务集团专注于服务小微企业与普通消费者，致力于打造一个开放的生态系统。\n\n公司管理方面，蔡崇信为董事会主席，吴泳铭为CEO。阿里巴巴集团的合伙人制度旨在通过合伙人提名董事会的大多数董事人选，确保公司长期发展。阿里巴巴的企业文化强调“客户第一，员工第二，股东第三”，并以“让天下没有难做的生意”为使命。抱歉，我无法处理该请求。抱歉，我无法处理此请求。阿里巴巴（中国）有限公司成立于2007年03月26日，法定代表人蒋芳。2019年，浙江高新企业百强榜排名第17位。2020年5月13日，作为第一批倡议方，与国家发展和改革委员会等发起“数字化转型伙伴行动”倡议。2021年2月10日，被评为“全国脱贫攻坚先进集体”拟表彰对象。2021年9月，入选“2021年中国民营企业500强”榜单，排名第5位。\n\n公司名称：阿里巴巴（中国）有限公司  \n外文名：Alibaba (China) Co., Ltd  \n成立时间：2007年03月26日  \n法定代表人：蒋芳  \n总部地点：浙江省杭州市滨江区长河街道网商路699号4号楼5楼508室  \n年营业额：92749400万元（2023年）\n\n阿里巴巴集团由曾担任英语教师的马云为首的18人，于1999年在中国杭州创立。自推出让中国的小型出口商、制造商及创业者接触全球买家的首个网站以来，阿里巴巴集团不断成长，成为了网上及移动商务的全球领导者。阿里巴巴集团及其关联公司经营领先业界的批发平台和零售平台，以及云计算、数字媒体和娱乐以及创新项目和其他业务。\n\n所获荣誉包括：  \n- 2019年，阿里巴巴（中国）有限公司获全国脱贫攻坚奖组织创新奖。  \n- 2021年2月25日，被授予“全国脱贫攻坚先进集体”荣誉称号。  \n- 2022年9月，入选2022中国企业500强第19位。  \n- 2023年9月12日，全国工商联发布《2023中国民营企业500强榜单》，以86453900万元营业收入位列榜单第2位。  \n- 2024年9月，入选“2024中国企业500强”榜单，排名第21位。  \n- 2024年10月12日，入选2024中国民营企业500强榜单第2位。请提供文本b和主题a，以便我进行筛选。请提供文本b和主题a，以便我进行相关信息的筛选。",
+  "url_list": {
+    "阿里巴巴": "https://alibaba.com.cn/",
+    "阿里巴巴1688.com - 全球领先的采购批发平台,批发网": "https://re.1688.com/",
+    "阿里巴巴集团介绍": "https://ali-home.alibaba.com/about-alibaba",
+    "阿里巴巴NYSE:BABA Alibaba Group Holdin - 行情中心- 新浪": "http://stock.finance.sina.com.cn/usstock/quotes/BABA.html",
+    "": "https://baike.baidu.com/item/%E9%98%BF%E9%87%8C%E5%B7%B4%E5%B7%B4%E9%9B%86%E5%9B%A2%E6%8E%A7%E8%82%A1%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8/54213262",
+    "阿里巴巴是全球领先的B2B电子商务网上贸易平台": "https://view.1688.com/cms/shangji/pindao/chunzhuang.html",
+    "阿里巴巴 1688.com-让天下没有难做的生意": "https://page.1688.com/index_new.html",
+    "阿里巴巴(中国)有限公司 - 百度百科": "https://baike.baidu.com/item/%E9%98%BF%E9%87%8C%E5%B7%B4%E5%B7%B4%EF%BC%88%E4%B8%AD%E5%9B%BD%EF%BC%89%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8/10089757"
+  }
+}
+print(a['url_list'])

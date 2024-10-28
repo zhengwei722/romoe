@@ -26,8 +26,8 @@ import requests
 bp = Blueprint('appmodel', __name__, url_prefix='/appmodel')
 
 @bp.get('/list')
-@log_decorator
 @token_required_decorator
+@log_decorator
 def list(userId):
     try:
         user = User.query.filter_by(id=userId).first()
