@@ -117,7 +117,6 @@ def edit(id):
     checked_roles = []
     for r in user.role:
         checked_roles.append(r.id)
-    print(checked_roles)
     return render_template('system/user/edit.html', user=user, roles=roles, checked_roles=checked_roles)
 
 

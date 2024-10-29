@@ -44,3 +44,8 @@ DIFY_URL = "http://127.0.0.1:5001/v1"
 DIFY_DATASET_KEY = "dataset-30WuQL3HSyOKaH9xdqqFGx6A"
 DIFY_CHAT_KEY =1
 DIFY_DATESET_MAX = 3
+# ALIPAY配置
+APPID = "9021000141651579"
+RETURN_URL = "http://960777365.gnway.cc:15124/api/version"
+NOTIFY_URL = "http://960777365.gnway.cc:15124/api/pay/verify_pay"
+GATWAY_URL = "https://openapi-sandbox.dl.alipaydev.com/gateway.do?"

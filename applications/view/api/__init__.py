@@ -3,6 +3,7 @@ from applications.common.utils.http import CustomResponse ,CustomStatus
 from applications.view.api.user import bp as user_bp
 from applications.view.api.knowledge import bp as knowledge_bp
 from applications.view.api.appmodel import bp as appmodel_bp
+from applications.view.api.pay import bp as pay_bp
 from applications.config import cfg
 
 # 创建sys
@@ -18,5 +19,6 @@ def register_api_bps(app: Flask):
     api_bp.register_blueprint(user_bp)
     api_bp.register_blueprint(knowledge_bp)
     api_bp.register_blueprint(appmodel_bp)
+    api_bp.register_blueprint(pay_bp)
     app.register_blueprint(api_bp)
 
