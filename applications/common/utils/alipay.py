@@ -4,6 +4,8 @@ from alipay import AliPay
 import datetime
 import random
 from applications.config import cfg
+from applications.extensions import db
+
 app_private_key_string = open("./applications/common/utils/private_key.txt").read()
 alipay_public_key_string = open("./applications/common/utils/public_key.txt").read()
 
@@ -26,8 +28,8 @@ alipay = AliPay(
     app_private_key_string=app_private_key_string,
     alipay_public_key_string=alipay_public_key_string,
     sign_type="RSA2",  # RSA 或者 RSA2
-    debug=True,  # 默认 False
-    verbose=True,  # 输出调试数据
+    debug=False,  # 默认 False
+    verbose=False,  # 输出调试数据
     config=AliPayConfig(timeout=15)  # 可选，请求超时时间
 )
 
@@ -54,11 +56,12 @@ def verify_pay(data,sign):
 
 
 
-def changeUserIdentity():
+def changeUserIdentity(user):
     pass
 
-def changeUserBalance():
-    pass
+def changeUserBalance(user,order):
+    user.balance += order.amount
+    db.session.add(user)
 
 def generate_order_id():
     # 获取当前日期和时间

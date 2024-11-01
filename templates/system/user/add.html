@@ -12,22 +12,35 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">账号</label>
                     <div class="layui-input-block">
-                        <input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+                        <input type="text" name="username" lay-verify="title" autocomplete="off"
+                               placeholder="请输入标题"
                                class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
                     <label class="layui-form-label">姓名</label>
                     <div class="layui-input-block">
-                        <input type="text" name="realName" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+                        <input type="text" name="realName" lay-verify="title" autocomplete="off"
+                               placeholder="请输入标题"
                                class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
                     <label class="layui-form-label">密码</label>
                     <div class="layui-input-block">
-                        <input type="text" name="password" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+                        <input type="text" name="password" lay-verify="title" autocomplete="off"
+                               placeholder="请输入标题"
                                class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">身份</label>
+                    <div class="layui-input-block">
+                        <select name="identity_type" lay-verify="required" placeholder="请选择身份" class="layui-select">
+                            <option value="">请选择身份</option>
+                            <option value="学生">学生</option>
+                            <option value="上班族">上班族</option>
+                        </select>
                     </div>
                 </div>
 
@@ -61,37 +74,37 @@
 </form>
 {% include 'system/common/footer.html' %}
 <script>
-  layui.use(['form', 'jquery'], function () {
-    let form = layui.form
-    let $ = layui.jquery
-    form.on('submit(user-save)', function (data) {
-      let roleIds = ''
-      $('input[type=checkbox]:checked').each(function () {
-        roleIds += $(this).val() + ','
-      })
-      roleIds = roleIds.substr(0, roleIds.length - 1)
-      data.field.roleIds = roleIds
-
-      $.ajax({
-        url: '/system/user/save',
-        data: JSON.stringify(data.field),
-        dataType: 'json',
-        contentType: 'application/json',
-        type: 'post',
-        success: function (result) {
-          if (result.success) {
-            layer.msg(result.msg, { icon: 1, time: 1000 }, function () {
-              parent.layer.close(parent.layer.getFrameIndex(window.name))//关闭当前页
-              parent.layui.table.reload('user-table')
+    layui.use(['form', 'jquery'], function () {
+        let form = layui.form
+        let $ = layui.jquery
+        form.on('submit(user-save)', function (data) {
+            let roleIds = ''
+            $('input[type=checkbox]:checked').each(function () {
+                roleIds += $(this).val() + ','
             })
-          } else {
-            layer.msg(result.msg, { icon: 2, time: 1000 })
-          }
-        }
-      })
-      return false
+            roleIds = roleIds.substr(0, roleIds.length - 1)
+            data.field.roleIds = roleIds
+
+            $.ajax({
+                url: '/system/user/save',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'post',
+                success: function (result) {
+                    if (result.success) {
+                        layer.msg(result.msg, {icon: 1, time: 1000}, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name))//关闭当前页
+                            parent.layui.table.reload('user-table')
+                        })
+                    } else {
+                        layer.msg(result.msg, {icon: 2, time: 1000})
+                    }
+                }
+            })
+            return false
+        })
     })
-  })
 </script>
 <script>
 </script>

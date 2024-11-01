@@ -31,12 +31,15 @@ bp = Blueprint('appmodel', __name__, url_prefix='/appmodel')
 def list(userId):
     try:
         user = User.query.filter_by(id=userId).first()
-        role_names = [role.sort for role in user.role][0]
+        if user.is_membership_expired():
+            access_level = 0
+        else:
+            access_level = 1
         appmodel_list = Appmodel.query.filter_by(enable=1)
         data = [{
             'knowledgeName': appmodel.model_name,
             'knowledgeId': appmodel.model_id,
-            'enable': appmodel.access_level.sort <= role_names
+            'enable': (access_level == 1) or (access_level == 0 and appmodel.access_level == 0)
         } for appmodel in appmodel_list]
         return CustomResponse(msg="查询成功",data=data)
     except Exception as e:

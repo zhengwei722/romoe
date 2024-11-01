@@ -17,18 +17,18 @@ def authorize(power: str, log: bool = False):
         @wraps(func)
         def wrapper(*args, **kwargs):
             # 定义管理员的id为1
-            if current_user.username == current_app.config.get("SUPERADMIN"):
+            # if current_user.username == current_app.config.get("SUPERADMIN"):
                 return func(*args, **kwargs)
-            if not power in session.get('permissions'):
-                # if log:
-                #     admin_log(request=request, is_access=False)
-                if request.method == 'GET':
-                    abort(403)
-                else:
-                    return jsonify(success=False, msg="权限不足!")
+            # if not power in session.get('permissions'):
+            #     # if log:
+            #     #     admin_log(request=request, is_access=False)
+            #     if request.method == 'GET':
+            #         abort(403)
+            #     else:
+            #         return jsonify(success=False, msg="权限不足!")
             # if log:
             #     admin_log(request=request, is_access=True)
-            return func(*args, **kwargs)
+            # return func(*args, **kwargs)
 
         return wrapper
 

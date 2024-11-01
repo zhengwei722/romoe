@@ -8,7 +8,7 @@ SECRET_KEY = "GiKDzmkgUyvAGqc3rIoukOx4bYpXTrb9tyYXzIHUhtA"
 # redis配置
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
-REDIS_PASSWORD = 'difyai123456'
+REDIS_PASSWORD = '123456'
 REDIS_DB = 15
 
 # mysql 配置

@@ -39,7 +39,14 @@
     {% endif %}
 
 </script>
+<script type="text/html" id="access_level-status">
+    {{ '{{#if (d.access_level == 1) { }}
+    <span style="color: red">会员可用</span>
+    {{# }else if(d.access_level == 0){ }}
+    <span style="color: green">非会员可用</span>
 
+    {{# } }}'|safe }}
+</script>
 {# 用户修改操作 #}
 <script type="text/html" id="user-bar">
     {% if authorize("system:appmodel:edit") %}
@@ -86,7 +93,7 @@
                 {title: 'id', field: 'id', align: 'center'},
                 {title: '模型名称', field: 'model_name', align: 'center', width: 110},
                 {title: '模型ID', field: 'model_id', align: 'center'},
-                {title: '访问权限', field: 'access_level', align: 'center'},
+                {title: '访问权限', field: 'access_level',templet: '#access_level-status', align: 'center'},
                 {title: '启用', field: 'enable', align: 'center', templet: '#user-enable', width: 120},
                 {title: '创建时间', field: 'create_at', templet: '#user-createTime', align: 'center'},
                 {title: '更新时间', field: 'update_at', templet: '#user-updateTime', align: 'center'},

@@ -1,3 +1,5 @@
+from email.policy import default
+
 from flask import Blueprint, session, redirect, url_for, render_template, request
 from flask_login import login_required, current_user
 from sqlalchemy import desc
@@ -80,12 +82,15 @@ def register():
         email_code = request.json.get('email_code')
         password = request.json.get('password')
         confirm_password = request.json.get('confirm_password')
+        # identity_type = request.json.get('identity_type')
         if email is None:
             return CustomResponse(code=CustomStatus.PARAM_ERROR.value,msg="请填写邮箱地址")
         if password != confirm_password:
             return CustomResponse(code=CustomStatus.TWO_PASSWORDS_INCORRECT.value,msg="两次密码不一致")
         if email_code is None:
             return CustomResponse(code=CustomStatus.LOGIN_CODE_MISS.value,msg="请填写验证码")
+        # if identity_type not in ["学生", "上班族"]:
+        #     return CustomResponse(code=CustomStatus.INVALID_PARAMETER.value,msg="请选择用户类型")
         try:
             validate_email(email)
         except EmailNotValidError as e:
@@ -118,13 +123,14 @@ def register():
     try:
         user = User.query.filter_by(username=email).first()
         if user:
+            user.type = type
             user.set_password(password)
             db.session.add(user)
             db.session.commit()
             return CustomResponse(msg="密码重置成功")
         realname = '用户' + str(uuid.uuid4())[:8]
         avatar = f'https://q2.qlogo.cn/headimg_dl?dst_uin={email}&spec=640'
-        user = User(username=email, realname=realname, enable=1,avatar=avatar)
+        user = User(username=email, realname=realname, enable=1,avatar=avatar,identity_type=identity_type)
         roles = Role.query.filter(Role.id.in_(['2'])).all()
         user.role = roles
         user.set_password(password)
@@ -168,6 +174,13 @@ def login():
             return CustomResponse(code=CustomStatus.AUTHENTICATION_FAILED.value, msg='密码错误')
         if user.enable == 0:
             return CustomResponse(code=CustomStatus.USER_BAN.value, msg='用户被封禁')
+
+        # 更新用户身份
+        if user.is_membership_expired():
+            default_role = ['2']
+            roles = Role.query.filter(Role.id.in_(default_role)).all()
+            user.role = roles
+            db.session.commit()
         # 获取token
         tokenData = {"userId": user.id}
         token = create_jwt_token(tokenData)
@@ -219,3 +232,13 @@ def other(userId):
         "roles":roles[0].name
     }
     return CustomResponse(code=CustomStatus.PASSWORD_INSUFFICIENT_LENGTH.value, msg="success",data=data)
+
+@bp.get('/is_vip')
+@token_required_decorator
+@log_decorator
+def is_vip(userId):
+    user = User.query.filter_by(id=str(userId)).first()
+    if user.is_membership_expired():
+        return CustomResponse(code=CustomStatus.USER_BAN.value, msg='用户不是会员')
+    return CustomResponse(code=CustomStatus.SUCCESS.value, msg='用户是会员')
+

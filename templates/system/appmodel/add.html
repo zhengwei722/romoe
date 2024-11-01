@@ -12,7 +12,8 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">模型名称</label>
                     <div class="layui-input-block">
-                        <input type="text" name="modelName" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+                        <input type="text" name="modelName" lay-verify="title" autocomplete="off"
+                               placeholder="请输入标题"
                                class="layui-input">
                     </div>
                 </div>
@@ -26,15 +27,14 @@
 
 
                 <div class="layui-form-item">
-                    <label class="layui-form-label">访问权限</label>
+                    <label class="layui-form-label">身份</label>
                     <div class="layui-input-block">
-
-                        {% for role in roles %}
-                            <input
-                                    value="{{ role.id }}" title="{{ role.name }}" type="radio"
-                                    name="roleIds" lay-skin="primary">
-                        {% endfor %}
-
+                        <select name="access_level" lay-verify="required" placeholder="请选择身份"
+                                class="layui-select">
+                            <option value="">请选择身份</option>
+                            <option value="0">非会员可用</option>
+                            <option value="1">会员可用</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -55,37 +55,33 @@
 </form>
 {% include 'system/common/footer.html' %}
 <script>
-  layui.use(['form', 'jquery'], function () {
-    let form = layui.form
-    let $ = layui.jquery
-    form.on('submit(user-save)', function (data) {
+    layui.use(['form', 'jquery'], function () {
+        let form = layui.form
+        let $ = layui.jquery
+        form.on('submit(user-save)', function (data) {
 
-      $('input[type=radio]:checked').each(function () {
-        roleId = $(this).val();
-      })
 
-      data.field.roleIds = roleId
 
-      $.ajax({
-        url: '/system/appmodel/save',
-        data: JSON.stringify(data.field),
-        dataType: 'json',
-        contentType: 'application/json',
-        type: 'post',
-        success: function (result) {
-          if (result.success) {
-            layer.msg(result.msg, { icon: 1, time: 1000 }, function () {
-              parent.layer.close(parent.layer.getFrameIndex(window.name))//关闭当前页
-              parent.layui.table.reload('user-table')
+            $.ajax({
+                url: '/system/appmodel/save',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'post',
+                success: function (result) {
+                    if (result.success) {
+                        layer.msg(result.msg, {icon: 1, time: 1000}, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name))//关闭当前页
+                            parent.layui.table.reload('user-table')
+                        })
+                    } else {
+                        layer.msg(result.msg, {icon: 2, time: 1000})
+                    }
+                }
             })
-          } else {
-            layer.msg(result.msg, { icon: 2, time: 1000 })
-          }
-        }
-      })
-      return false
+            return false
+        })
     })
-  })
 </script>
 <script>
 </script>

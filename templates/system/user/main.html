@@ -86,7 +86,9 @@
 <script type="text/html" id="user-createTime">
     {{layui.util.toDateString(d.create_at,  "yyyy-MM-dd HH:mm:ss")}}
 </script>
-
+<script type="text/html" id="user-membershipExpirationDate">
+    {{layui.util.toDateString(d.membershipExpirationDate,  "yyyy-MM-dd HH:mm:ss")}}
+</script>
 <script type="text/html" id="user-updateTime">
     {{layui.util.toDateString(d.update_at,  "yyyy-MM-dd HH:mm:ss")}}
 </script>
@@ -110,7 +112,9 @@
                 {title: '姓名', field: 'realname', align: 'center', width: 110},
                 {title: '账号', field: 'username', align: 'center'},
                 {title: '角色', field: 'role', align: 'center'},
-                {title: '余额', field: 'balance', align: 'center'},
+                {title: '钻石', field: 'diamonds', align: 'center'},
+                {title: '文字', field: 'words', align: 'center'},
+                {title: '会员到期时间', field: 'membershipExpirationDate', templet: '#user-membershipExpirationDate', align: 'center'},
                 {title: '启用', field: 'enable', align: 'center', templet: '#user-enable', width: 120},
                 {title: '注册时间', field: 'create_at', templet: '#user-createTime', align: 'center'},
                 {title: '更新时间', field: 'update_at', templet: '#user-updateTime', align: 'center'},

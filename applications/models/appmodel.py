@@ -10,8 +10,7 @@ class Appmodel(db.Model):
     model_name = db.Column(db.String(99), comment='模型名称')
     model_id = db.Column(db.String(99), comment='模型ID')
     enable = db.Column(db.Integer, default=0, comment='启用')
-    access_level_id = db.Column(db.Integer, db.ForeignKey('role.id'), comment='访问限制')
-    access_level = db.relationship('Role', foreign_keys=[access_level_id])
+    access_level = db.Column(db.Integer, default=0, comment='会员可用')
     create_at = db.Column(db.DateTime, default=datetime.datetime.now, comment='创建时间')
     update_at = db.Column(db.DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now, comment='最近更新时间')
 

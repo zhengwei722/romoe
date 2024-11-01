@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 from flask import jsonify, current_app, Blueprint, render_template
 from flask_login import login_required, current_user
+from humanize.number import powers
 
 from ...models import Power
 from ...schemas import PowerOutSchema
@@ -91,42 +92,45 @@ def configs():
 @bp.get('/menu')
 @login_required
 def menu():
-    if current_user.username != current_app.config.get("SUPERADMIN"):
-        role = current_user.role
-        powers = []
-        for i in role:
-            # 如果角色没有被启用就直接跳过
-            if i.enable == 0:
-                continue
-            # 变量角色用户的权限
-            for p in i.power:
-                # 如果权限关闭了就直接跳过
-                if p.enable == 0:
-                    continue
-                # 一二级菜单
-                if int(p.type) in [0, 1] and p not in powers:
-                    powers.append(p)
-
-        power_schema = PowerOutSchema(many=True)  # 用已继承 ma.ModelSchema 类的自定制类生成序列化类
-        power_dict = power_schema.dump(powers)  # 生成可序列化对象
-        power_dict.sort(key=lambda x: (x['parent_id'], x['id']), reverse=True)
-
-        menu_dict = OrderedDict()
-        for _dict in power_dict:
-            if _dict['id'] in menu_dict:
-                # 当前节点添加子节点
-                _dict['children'] = copy.deepcopy(menu_dict[_dict['id']])
-                _dict['children'].sort(key=lambda item: item['sort'])
-                # 删除子节点
-                del menu_dict[_dict['id']]
-
-            if _dict['parent_id'] not in menu_dict:
-
-                menu_dict[_dict['parent_id']] = [_dict]
-            else:
-                menu_dict[_dict['parent_id']].append(_dict)
-        return jsonify(sorted(menu_dict.get(0), key=lambda item: item['sort']))
-    else:
+    # if current_user.username != current_app.config.get("SUPERADMIN"):
+    #     # role = current_user.role
+    #     # powers = []
+    #     # for i in role:
+    #     #     # 如果角色没有被启用就直接跳过
+    #     #     if i.enable == 0:
+    #     #         continue
+    #     #     # 变量角色用户的权限
+    #     #     for p in i.power:
+    #     #         # 如果权限关闭了就直接跳过
+    #     #         if p.enable == 0:
+    #     #             continue
+    #     #         # 一二级菜单
+    #     #         if int(p.type) in [0, 1] and p not in powers:
+    #     #             powers.append(p)
+    #     powers = Power.query.filter(Power.type.in_([0, 1])).all()
+    #     print(powers)
+    #
+    #     power_schema = PowerOutSchema(many=True)  # 用已继承 ma.ModelSchema 类的自定制类生成序列化类
+    #     power_dict = power_schema.dump(powers)  # 生成可序列化对象
+    #     power_dict.sort(key=lambda x: (x['parent_id'], x['id']), reverse=True)
+    #
+    #     menu_dict = OrderedDict()
+    #     for _dict in power_dict:
+    #         if _dict['id'] in menu_dict:
+    #             # 当前节点添加子节点
+    #             _dict['children'] = copy.deepcopy(menu_dict[_dict['id']])
+    #             _dict['children'].sort(key=lambda item: item['sort'])
+    #             # 删除子节点
+    #             del menu_dict[_dict['id']]
+    #
+    #         if _dict['parent_id'] not in menu_dict:
+    #
+    #             menu_dict[_dict['parent_id']] = [_dict]
+    #         else:
+    #             menu_dict[_dict['parent_id']].append(_dict)
+    #     print(12)
+    #     return jsonify(sorted(menu_dict.get(0), key=lambda item: item['sort']))
+    # else:
         powers = Power.query.all()
         power_schema = PowerOutSchema(many=True)  # 用已继承 ma.ModelSchema 类的自定制类生成序列化类
         power_dict = power_schema.dump(powers)  # 生成可序列化对象
@@ -152,5 +156,4 @@ from applications.models import User, AdminLog
 @login_required
 def welcome():
     user_number = User.query.count()
-    print(user_number)
     return render_template('system/console/console.html')

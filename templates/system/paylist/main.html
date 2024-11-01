@@ -113,11 +113,14 @@
     </script>
 
     <script type="text/html" id="user-createTime">
-        {{layui.util.toDateString(d.create_at,  "yyyy-MM-dd HH:mm:ss")}}
+        {{layui.util.toDateString(d.created_at,  "yyyy-MM-dd HH:mm:ss")}}
+    </script>
+    <script type="text/html" id="user-pay_time">
+        {{layui.util.toDateString(d.pay_time,  "yyyy-MM-dd HH:mm:ss")}}
     </script>
 
     <script type="text/html" id="user-updateTime">
-        {{layui.util.toDateString(d.update_at,  "yyyy-MM-dd HH:mm:ss")}}
+        {{layui.util.toDateString(d.updated_at,  "yyyy-MM-dd HH:mm:ss")}}
     </script>
 {% endraw %}
 
@@ -144,10 +147,10 @@
                 {title: '支付方式', field: 'pay_method', align: 'center'},
                 {title: '类型', field: 'pay_type', templet: '#log1-status', align: 'center'},
 
-                {title: '支付时间', field: 'pay_time', templet: '#user-createTime', align: 'center'},
+                {title: '支付时间', field: 'pay_time', templet: '#user-pay_time', align: 'center'},
 
-                {title: '创建时间', field: 'create_at', templet: '#user-createTime', align: 'center'},
-                {title: '更新时间', field: 'update_at', templet: '#user-updateTime', align: 'center'},
+                {title: '创建时间', field: 'created_at', templet: '#user-createTime', align: 'center'},
+                {title: '更新时间', field: 'updated_at', templet: '#user-updateTime', align: 'center'},
                 {title: '操作', toolbar: '#user-bar', align: 'center', width: 180}
             ]
         ]
@@ -239,7 +242,7 @@
         }
 
         window.remove = function (obj) {
-            layer.confirm('确定要删除该用户', {icon: 3, title: '提示'}, function (index) {
+            layer.confirm('确定要删除该订单', {icon: 3, title: '提示'}, function (index) {
                 layer.close(index)
                 let loading = layer.load()
                 $.ajax({

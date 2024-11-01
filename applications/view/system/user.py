@@ -31,6 +31,14 @@ def data():
     username = str_escape(request.args.get('username', type=str))
     dept_id = request.args.get('deptId', type=int)
 
+    # 更新用户身份
+    users = User.query.filter(User.id != 1).all()
+    for user in users:
+        if user.is_membership_expired():
+            default_role = ['2']
+            roles = Role.query.filter(Role.id.in_(default_role)).all()
+            user.role = roles
+            db.session.commit()
 
     filters = []
     if real_name:
@@ -53,9 +61,9 @@ def data():
             'role': [role.name for role in user.role][0],
             'create_at': user.create_at.astimezone(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S'),
             'update_at': user.update_at.astimezone(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S'),
-            'balance':user.balance
-
-
+            'diamonds':user.diamonds,
+            'words': user.words,
+            'membershipExpirationDate': user.membershipExpirationDate.astimezone(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S'),
         } for user in query.items],
         count=query.total)
 
@@ -77,14 +85,15 @@ def save():
     username = str_escape(req_json.get('username'))
     real_name = str_escape(req_json.get('realName'))
     password = str_escape(req_json.get('password'))
+    identity_type = str_escape(req_json.get('identity_type'))
     role_ids = a.split(',')
 
-    if not username or not real_name or not password:
+    if not username or not real_name or not password or not identity_type:
         return fail_api(msg="账号姓名密码不得为空")
 
     if bool(User.query.filter_by(username=username).count()):
         return fail_api(msg="用户已经存在")
-    user = User(username=username, realname=real_name,enable=1)
+    user = User(username=username, realname=real_name,enable=1,identity_type=identity_type)
     user.set_password(password)
     db.session.add(user)
     roles = Role.query.filter(Role.id.in_(role_ids)).all()
@@ -129,20 +138,24 @@ def update():
     id = str_escape(req_json.get("userId"))
     username = str_escape(req_json.get('username'))
     real_name = str_escape(req_json.get('realName'))
+    identity_type = str_escape(req_json.get('identity_type'))
 
     password = str_escape(req_json.get('password'))
-    balance = str_escape(req_json.get('balance'))
+    diamonds = str_escape(req_json.get('diamonds'))
+    words = str_escape(req_json.get('words'))
     if not a:
         return fail_api(msg="数据不完整")
-
+    print(a)
     role_ids = a.split(',')
-    User.query.filter_by(id=id).update({'username': username, 'realname': real_name,'balance':balance})
+    print(role_ids)
+    User.query.filter_by(id=id).update({'username': username, 'realname': real_name,'diamonds':diamonds,'words':words,'identity_type':identity_type})
     u = User.query.filter_by(id=id).first()
     if password:
         u.set_password(password)
         db.session.add(u)
 
     roles = Role.query.filter(Role.id.in_(role_ids)).all()
+    print(roles)
     u.role = roles
 
     db.session.commit()

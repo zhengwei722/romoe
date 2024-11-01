@@ -37,7 +37,7 @@ def data():
             'model_name': appmodel.model_name,
             'model_id': appmodel.model_id,
             'enable': appmodel.enable,
-            'access_level': appmodel.access_level.name,
+            'access_level': appmodel.access_level,
             'create_at': appmodel.create_at.astimezone(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S'),
             'update_at':appmodel.update_at.astimezone(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S')
 
@@ -59,14 +59,15 @@ def add():
 @authorize("system:appmodel:add", log=True)
 def save():
     req_json = request.get_json(force=True)
-    roleIds = req_json.get("roleIds")
+    # roleIds = req_json.get("roleIds")
     modelName = str_escape(req_json.get('modelName'))
     modelId = str_escape(req_json.get('modelId'))
-    if not roleIds or not modelName or not modelId:
+    access_level = str_escape(req_json.get('access_level'))
+    if not access_level or not modelName or not modelId:
         return fail_api(msg="模型名称，ID，权限不得为空")
     if bool(Appmodel.query.filter_by(model_name=modelName).count()):
         return fail_api(msg="模型已经存在")
-    appmodel = Appmodel(model_name=modelName, model_id=modelId,access_level_id=roleIds,enable=1)
+    appmodel = Appmodel(model_name=modelName, model_id=modelId,access_level=access_level,enable=1)
     db.session.add(appmodel)
     db.session.commit()
     return success_api(msg="增加成功")
@@ -88,12 +89,12 @@ def delete(id):
 @authorize("system:appmodel:edit", log=True)
 def edit(id):
     appmodel = curd.get_one_by_id(Appmodel, id)
-    roles = Role.query.all()
-    checked_roles = []
-
-    checked_roles.append(appmodel.access_level_id)
-    print(checked_roles)
-    return render_template('system/appmodel/edit.html', appmodel=appmodel, roles=roles,checked_roles=checked_roles)
+    # roles = Role.query.all()
+    # checked_roles = []
+    #
+    # checked_roles.append(appmodel.access_level_id)
+    # print(checked_roles)
+    return render_template('system/appmodel/edit.html', appmodel=appmodel)
 
 
 #  编辑用户
@@ -101,20 +102,19 @@ def edit(id):
 @authorize("system:appmodel:edit", log=True)
 def update():
     req_json = request.get_json(force=True)
-    roleIds = str_escape(req_json.get("roleIds"))
+    access_level = str_escape(req_json.get("access_level"))
     appmodelId = str_escape(req_json.get("appmodelId"))
     model_name = str_escape(req_json.get('model_name'))
     model_id = str_escape(req_json.get('model_id'))
-    print(roleIds,appmodelId,model_id,model_name)
 
-    if not roleIds or not appmodelId or not model_name or not model_id:
+    if not access_level or not appmodelId or not model_name or not model_id:
         return fail_api(msg="模型名称，ID，权限不得为空")
 
     # if roleIds:
     #     return fail_api(msg="数据不完整")
     #
     #
-    Appmodel.query.filter_by(id=appmodelId).update({'model_name': model_name, 'model_id': model_id,'access_level_id':roleIds})
+    Appmodel.query.filter_by(id=appmodelId).update({'model_name': model_name, 'model_id': model_id,'access_level':access_level})
     # u = User.query.filter_by(id=id).first()
     #
     #

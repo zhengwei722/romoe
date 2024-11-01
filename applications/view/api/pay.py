@@ -1,3 +1,5 @@
+from itertools import product
+
 from flask import Blueprint, session, redirect, url_for, render_template, request
 from flask_login import login_required, current_user
 from sqlalchemy import desc
@@ -63,17 +65,19 @@ def alipay_verify_pay():
         if verify_pay(data, signature):
             order.status = 1
             order.pay_time = timestamp
-            pay_type = order.pay_type
+            pay_note = order.note
 
             uid = order.uid
             user = User.query.filter(User.id == uid).first()
-            if pay_type == 0:
-                # 改变用户的身份
-                changeUserIdentity()
-            if pay_type == 1:
-                # user.balance = user.balance + order.amount
-                # 增加用户的余额
-                changeUserBalance()
+            role = Role.query.filter(Role.name == pay_note).first()
+            user.add_diamonds(role.diamonds)
+            user.add_words(role.words)
+            user.extend_membership(role.member_day)
+            default_role = [role.id]
+            roles = Role.query.filter(Role.id.in_(default_role)).all()
+            user.role = roles
+
+
             db.session.add(user)
             db.session.add(order)
             db.session.commit()
@@ -84,10 +88,10 @@ def alipay_verify_pay():
         return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误", data=str(e))
 
 
-@bp.get('list')
+@bp.get('orderlist')
 @token_required_decorator
 @log_decorator
-def get_pay_list(userId):
+def get_order_list(userId):
     try:
         pay_list = PayOrder.query.filter(PayOrder.uid == userId).all()
         data = [{
@@ -103,6 +107,31 @@ def get_pay_list(userId):
             'updated_at': (pay.updated_at).strftime('%Y-%m-%d %H:%M:%S'),
             'pay_time': (pay.pay_time).strftime('%Y-%m-%d %H:%M:%S') if pay.pay_time else None,
         } for pay in pay_list]
+        return CustomResponse(msg="操作成功", data=data)
+    except Exception as e:
+        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误", data=str(e))
+
+
+@bp.get('productlist')
+@token_required_decorator
+@log_decorator
+def get_product_list(userId):
+    try:
+        user = User.query.filter(User.id == userId).first()
+        if user.identity_type == '学生':
+            products = Role.query.filter(Role.code == 'studentvip').all()
+        else:
+            products = Role.query.filter(Role.code == 'workervip').all()
+        data = [{
+            'id': product.id,
+            'name': product.name,
+            'code': product.code,
+            'price': product.price,
+            'member_day': product.member_day,
+            'diamonds': product.diamonds,
+            'words': product.words,
+
+        } for product in products]
         return CustomResponse(msg="操作成功", data=data)
     except Exception as e:
         return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误", data=str(e))

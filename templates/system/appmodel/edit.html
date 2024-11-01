@@ -34,16 +34,15 @@
                 </div>
 
 
-                <div class="layui-form-item">
-                    <label class="layui-form-label">访问限制</label>
+<div class="layui-form-item">
+                    <label class="layui-form-label">身份</label>
                     <div class="layui-input-block">
-                        {% for role in roles %}
-                            <input{% if role.id in checked_roles %}
-                                checked
-                            {% endif %}
-                                value="{{ role.id }}" title="{{ role.name }}" type="radio"
-                                name="roleIds" lay-skin="primary">
-                        {% endfor %}
+                        <select name="access_level" lay-verify="required" placeholder="请选择身份"
+                                class="layui-select">
+                            <option value="">请选择身份</option>
+                            <option value="0" {% if appmodel.access_level == 0 %}selected{% endif %}>非会员可用</option>
+                            <option value="1" {% if appmodel.access_level == 1 %}selected{% endif %}>会员可用</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -73,10 +72,7 @@
 
         form.on('submit(user-update)', function (data) {
 
-            $('input[type=radio]:checked').each(function () {
-                 roleId = $(this).val();
-            })
-            data.field.roleIds = roleId
+
             $.ajax({
                 url: '/system/appmodel/update',
                 data: JSON.stringify(data.field),

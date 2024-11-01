@@ -10,26 +10,18 @@ admin_cli = AppGroup("admin")
 now_time = datetime.datetime.now()
 userdata = [
     User(
-        id=1,
+        id=1000000,
         username='admin',
         password_hash='pbkdf2:sha256:150000$raM7mDSr$58fe069c3eac01531fc8af85e6fc200655dd2588090530084d182e6ec9d52c85',
         create_at=now_time,
         enable=1,
         realname='超级管理',
         avatar='/static/system/admin/images/avatar.jpg',
-        balance=0.0
-    ),
-    User(
-        id=2,
-        username='test',
-        password_hash='pbkdf2:sha256:150000$cRS8bYNh$adb57e64d929863cf159f924f74d0634f1fecc46dba749f1bfaca03da6d2e3ac',
-        create_at=now_time,
-        enable=1,
-        realname='测试',
-        avatar='/static/system/admin/images/avatar.jpg',
-        balance=0.0
+        diamonds=0,
+        words=0,
+        membershipExpirationDate=now_time,
 
-    ),
+    )
 ]
 roledata = [
     Role(
@@ -37,36 +29,23 @@ roledata = [
         code='admin',
         name='管理员',
         enable=1,
-        details='管理员',
         sort=1,
         create_time=now_time,
+        member_day=0,
+        diamonds=0,
+        words=0,
+
     ),
     Role(
         id=2,
         code='common',
         name='普通用户',
         enable=1,
-        details='只有查看，没有增删改权限',
         sort=2,
         create_time=now_time,
-    ),
-    Role(
-        id=3,
-        code='vip',
-        name='会员',
-        enable=1,
-        details='vip',
-        sort=3,
-        create_time=now_time,
-    ),
-    Role(
-        id=4,
-        code='svip',
-        name='高级会员',
-        enable=1,
-        details='svip',
-        sort=4,
-        create_time=now_time,
+        member_day=0,
+        diamonds=0,
+        words=0,
     )
 ]
 
@@ -97,7 +76,7 @@ powerdata = [
         create_time=now_time,
         enable=1,
 
-    ),Power(
+    ), Power(
         id=3,
         name='用户管理',
         type='1',
@@ -188,7 +167,7 @@ powerdata = [
         create_time=now_time,
         enable=1,
 
-    ),  Power(
+    ), Power(
         id=21,
         name='权限增加',
         type='2',
@@ -320,18 +299,13 @@ powerdata = [
 
     )
 
-
-
 ]
 
 
 def add_user_role():
     admin_role = Role.query.filter_by(id=1).first()
-    admin_user = User.query.filter_by(id=1).first()
+    admin_user = User.query.filter_by(username='admin').first()
     admin_user.role.append(admin_role)
-    test_role = Role.query.filter_by(id=2).first()
-    test_user = User.query.filter_by(id=2).first()
-    test_user.role.append(test_role)
     db.session.commit()
 
 

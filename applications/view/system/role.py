@@ -45,13 +45,19 @@ def add():
 @authorize("system:role:add", log=True)
 def save():
     req = request.get_json(force=True)
-    details = str_escape(req.get("details"))
+    member_day = str_escape(req.get("member_day"))
+    price = str_escape(req.get("price"))
     enable = str_escape(req.get("enable"))
     roleCode = str_escape(req.get("roleCode"))
     roleName = str_escape(req.get("roleName"))
+    diamonds = str_escape(req.get("diamonds"))
+    words = str_escape(req.get("words"))
     sort = str_escape(req.get("sort"))
     role = Role(
-        details=details,
+        member_day=int(member_day),
+        price = float(price),
+        diamonds = int(diamonds),
+        words = int(words),
         enable=enable,
         code=roleCode,
         name=roleName,
@@ -129,7 +135,10 @@ def update():
         "name": str_escape(req_json.get("roleName")),
         "sort": str_escape(req_json.get("sort")),
         "enable": str_escape(req_json.get("enable")),
-        "details": str_escape(req_json.get("details"))
+        "member_day": int(str_escape(req_json.get("member_day"))),
+        "price": float(str_escape(req_json.get("price"))),
+        "diamonds": int(str_escape(req_json.get("diamonds"))),
+        "words": int(str_escape(req_json.get("words")))
     }
     role = Role.query.filter_by(id=id).update(data)
     db.session.commit()
