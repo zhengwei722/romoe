@@ -5,8 +5,9 @@ class PayOrder(db.Model):
     __tablename__ = 'payorder'
     id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.Integer, nullable=False)
+    identitystatus = db.Column(db.Integer, nullable=False) # 0 非会员状态 会员状态
     order_id = db.Column(db.String(64), nullable=False)
-    amount = db.Column(db.Float, nullable=False)
+    price = db.Column(db.Float(precision=2), default=0.0, comment='价格')
     status = db.Column(db.String(16), nullable=False) # 0 未支付 1已支付 2已开票 4是失败
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)

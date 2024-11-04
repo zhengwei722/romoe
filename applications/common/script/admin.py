@@ -34,6 +34,7 @@ roledata = [
         member_day=0,
         diamonds=0,
         words=0,
+        price=0,
 
     ),
     Role(
@@ -45,7 +46,59 @@ roledata = [
         create_time=now_time,
         member_day=0,
         diamonds=0,
+
         words=0,
+        price=0,
+    ),
+    Role(
+        id=3,
+        code='mvip',
+        name='月度会员',
+        enable=1,
+        sort=3,
+        create_time=now_time,
+        member_day=31,
+        diamonds=0,
+        words=300000,
+        price=36.9,
+        cashback = 10
+    ),
+    Role(
+        id=4,
+        code='yvip',
+        name='年度会员',
+        enable=1,
+        sort=3,
+        create_time=now_time,
+        member_day=365,
+        diamonds=0,
+        words=3600000,
+        price=299,
+        cashback=50
+    ),
+    Role(
+        id=5,
+        code='tvip',
+        name='体验会员',
+        enable=1,
+        sort=4,
+        create_time=now_time,
+        member_day=1,
+        diamonds=0,
+        words=50000,
+        price=0,
+    ),
+    Role(
+        id=6,
+        code='packet',
+        name='流量包',
+        enable=1,
+        sort=3,
+        create_time=now_time,
+        member_day=0,
+        diamonds=0,
+        words=50000,
+        price=9.9,
     )
 ]
 

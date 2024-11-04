@@ -10,7 +10,7 @@ from applications.common.utils.http import table_api, fail_api, success_api
 from applications.common.utils.rights import authorize
 from applications.common.utils.validate import str_escape
 from applications.extensions import db
-from applications.models import Role
+from applications.models import Role,InviteRecord
 from applications.models import User, AdminLog
 from applications.common.utils.http import CustomResponse ,CustomStatus
 import random
@@ -23,6 +23,10 @@ from applications.common.utils.redis import conn_redis_pool
 from applications.common.utils.jwt import token_required_decorator,create_jwt_token
 from applications.common.utils.logger import log_decorator
 import uuid
+import pytz
+
+
+
 bp = Blueprint('user', __name__, url_prefix='/user')
 
 '''
@@ -55,8 +59,8 @@ def get_email_code():
 
         body_content = cfg["LOGIN_CODE_EMAIL_BODY_CONTENT"].format(login_code=email_code)
 
-        msg = Message(subject="欢迎使用Romoe", recipients=email.split(";"), body=body_content)
-        flask_mail.send(msg)
+        # msg = Message(subject="欢迎使用Romoe", recipients=email.split(";"), body=body_content)
+        # flask_mail.send(msg)
         return CustomResponse(msg="发送成功")
     except SQLAlchemyError:
         return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误",data=str('SQLAlchemyError'))
@@ -79,9 +83,10 @@ def register():
     # 验证数据
     try:
         email = request.json.get('email')
-        email_code = request.json.get('email_code')
+        email_code = request.json.get('verificationCode')
         password = request.json.get('password')
         confirm_password = request.json.get('confirm_password')
+        invite_code = request.json.get('invite_code')
         # identity_type = request.json.get('identity_type')
         if email is None:
             return CustomResponse(code=CustomStatus.PARAM_ERROR.value,msg="请填写邮箱地址")
@@ -123,19 +128,29 @@ def register():
     try:
         user = User.query.filter_by(username=email).first()
         if user:
-            user.type = type
+            # user.type = type
             user.set_password(password)
             db.session.add(user)
             db.session.commit()
             return CustomResponse(msg="密码重置成功")
         realname = '用户' + str(uuid.uuid4())[:8]
+        invitationCode = str(uuid.uuid4())[:8]
         avatar = f'https://q2.qlogo.cn/headimg_dl?dst_uin={email}&spec=640'
-        user = User(username=email, realname=realname, enable=1,avatar=avatar,identity_type=identity_type)
+        user = User(username=email, realname=realname, enable=1,avatar=avatar,invitationCode=invitationCode)
         roles = Role.query.filter(Role.id.in_(['2'])).all()
         user.role = roles
         user.set_password(password)
+
         db.session.add(user)
+        db.session.flush()
+
+        if invite_code:
+            invite_user = User.query.filter_by(invitationCode=invite_code).first()
+            if invite_user:
+                inviteRecord = InviteRecord(inviter_id=invite_user.id,invitee_id=user.id)
+                db.session.add(inviteRecord)
         db.session.commit()
+        user.open_trial_membership()
         return CustomResponse(msg="注册成功")
     except SQLAlchemyError:
         return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误",data=str('SQLAlchemyError'))
@@ -180,6 +195,7 @@ def login():
             default_role = ['2']
             roles = Role.query.filter(Role.id.in_(default_role)).all()
             user.role = roles
+            user.words = 0
             db.session.commit()
         # 获取token
         tokenData = {"userId": user.id}
@@ -193,6 +209,10 @@ def login():
             "token":token,
             'role_names':role_names,
             'avatar':user.avatar,
+            'words':user.words,
+            'diamonds':user.diamonds,
+            'commission':user.commission,
+            'membershipExpirationDate': user.membershipExpirationDate.astimezone(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S'),
 
         }
 
@@ -239,6 +259,12 @@ def other(userId):
 def is_vip(userId):
     user = User.query.filter_by(id=str(userId)).first()
     if user.is_membership_expired():
-        return CustomResponse(code=CustomStatus.USER_BAN.value, msg='用户不是会员')
-    return CustomResponse(code=CustomStatus.SUCCESS.value, msg='用户是会员')
+        default_role = ['2']
+        roles = Role.query.filter(Role.id.in_(default_role)).all()
+        user.role = roles
+        user.words = 0
+        db.session.commit()
+        return CustomResponse(code=CustomStatus.MEMBERSHIP_EXPIRED.value, msg='会员已过期')
+    return CustomResponse(code=CustomStatus.SUCCESS.value, msg='会员')
+
 

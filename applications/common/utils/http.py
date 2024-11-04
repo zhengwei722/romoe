@@ -92,3 +92,5 @@ class CustomStatus(Enum):
     PASSWORD_INSUFFICIENT_LENGTH = 5009
     # 身份验证失败
     AUTHENTICATION_FAILED = 5010
+    # 会员已过期
+    MEMBERSHIP_EXPIRED = 5011

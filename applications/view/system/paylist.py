@@ -51,7 +51,7 @@ def data():
             'uid': order.uid,
             'order_id': order.order_id,
             'note': order.note,
-            'amount': order.amount,
+            'amount': order.price,
             'status': order.status,
             'pay_method': order.pay_method,
 

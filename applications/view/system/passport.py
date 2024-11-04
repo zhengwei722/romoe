@@ -51,10 +51,9 @@ def login_post():
 
     if user.enable == 0:
         return fail_api(msg="用户被暂停使用")
+    is_admin = [role.id for role in user.role][0]
 
-    is_admin = Role.query.filter_by(id=1).first() in user.role
-
-    if not is_admin:
+    if not is_admin and is_admin != "1":
         return fail_api(msg="无管理员权限")
 
     if username == user.username and user.validate_password(password):

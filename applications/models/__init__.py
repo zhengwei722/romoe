@@ -8,4 +8,5 @@ from .user_role import user_role
 from .knowledge import Knowledge
 from .appmodel import Appmodel
 from .payorder import PayOrder
+from .invite import InviteRecord
 

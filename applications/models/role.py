@@ -13,6 +13,7 @@ class Role(db.Model):
     words = db.Column(db.Integer, comment='文字')
     sort = db.Column(db.Integer, comment='排序')
     price = db.Column(db.Float(precision=2), default=0.0, comment='价格')
+    cashback = db.Column(db.Float(precision=2), default=0.0, comment='返现')
     create_time = db.Column(db.DateTime, default=datetime.datetime.now, comment='创建时间')
     update_time = db.Column(db.DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now, comment='更新时间')
 

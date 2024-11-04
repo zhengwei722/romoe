@@ -8,15 +8,15 @@ SECRET_KEY = "GiKDzmkgUyvAGqc3rIoukOx4bYpXTrb9tyYXzIHUhtA"
 # redis配置
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
-REDIS_PASSWORD = '123456'
+REDIS_PASSWORD = 'difyai123456'
 REDIS_DB = 15
 
 # mysql 配置
-MYSQL_USERNAME = "root"
-MYSQL_PASSWORD = "123456"
-MYSQL_HOST = "localhost"
+MYSQL_USERNAME = "romoe"
+MYSQL_PASSWORD = "cL23wm5DLMs3Kcji"
+MYSQL_HOST = "111.229.87.152"
 MYSQL_PORT = 3306
-MYSQL_DATABASE = "remoe"
+MYSQL_DATABASE = "romoe"
 # flask-mail配置
 MAIL_SERVER = 'smtp.163.com'
 MAIL_PORT = 465
@@ -46,6 +46,6 @@ DIFY_CHAT_KEY =1
 DIFY_DATESET_MAX = 3
 # ALIPAY配置
 APPID = "9021000141651579"
-RETURN_URL = "http://960777365.gnway.cc:15124/api/version"
-NOTIFY_URL = "http://960777365.gnway.cc:15124/api/pay/verify_pay"
+RETURN_URL = "http://960777365.gnway.cc:8000/api/version"
+NOTIFY_URL = "http://960777365.gnway.cc:8000/api/pay/verify_pay"
 GATWAY_URL = "https://openapi-sandbox.dl.alipaydev.com/gateway.do?"

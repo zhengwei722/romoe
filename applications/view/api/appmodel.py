@@ -37,8 +37,8 @@ def list(userId):
             access_level = 1
         appmodel_list = Appmodel.query.filter_by(enable=1)
         data = [{
-            'knowledgeName': appmodel.model_name,
-            'knowledgeId': appmodel.model_id,
+            'model_name': appmodel.model_name,
+            'model_id': appmodel.model_id,
             'enable': (access_level == 1) or (access_level == 0 and appmodel.access_level == 0)
         } for appmodel in appmodel_list]
         return CustomResponse(msg="查询成功",data=data)
