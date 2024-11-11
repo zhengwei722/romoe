@@ -38,6 +38,7 @@ def data():
             'model_id': appmodel.model_id,
             'enable': appmodel.enable,
             'access_level': appmodel.access_level,
+            'ratio':appmodel.ratio,
             'create_at': appmodel.create_at.astimezone(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S'),
             'update_at':appmodel.update_at.astimezone(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S')
 
@@ -61,13 +62,14 @@ def save():
     req_json = request.get_json(force=True)
     # roleIds = req_json.get("roleIds")
     modelName = str_escape(req_json.get('modelName'))
+    ratio = str_escape(req_json.get('ratio'))
     modelId = str_escape(req_json.get('modelId'))
     access_level = str_escape(req_json.get('access_level'))
-    if not access_level or not modelName or not modelId:
-        return fail_api(msg="模型名称，ID，权限不得为空")
+    if not access_level or not modelName or not modelId or not ratio:
+        return fail_api(msg="模型名称，ID，倍率,权限不得为空")
     if bool(Appmodel.query.filter_by(model_name=modelName).count()):
         return fail_api(msg="模型已经存在")
-    appmodel = Appmodel(model_name=modelName, model_id=modelId,access_level=access_level,enable=1)
+    appmodel = Appmodel(model_name=modelName, model_id=modelId,ratio = ratio,access_level=access_level,enable=1)
     db.session.add(appmodel)
     db.session.commit()
     return success_api(msg="增加成功")
@@ -106,15 +108,16 @@ def update():
     appmodelId = str_escape(req_json.get("appmodelId"))
     model_name = str_escape(req_json.get('model_name'))
     model_id = str_escape(req_json.get('model_id'))
+    ratio = str_escape(req_json.get('ratio'))
 
-    if not access_level or not appmodelId or not model_name or not model_id:
+    if not access_level or not appmodelId or not model_name or not model_id or not ratio:
         return fail_api(msg="模型名称，ID，权限不得为空")
 
     # if roleIds:
     #     return fail_api(msg="数据不完整")
     #
     #
-    Appmodel.query.filter_by(id=appmodelId).update({'model_name': model_name, 'model_id': model_id,'access_level':access_level})
+    Appmodel.query.filter_by(id=appmodelId).update({'model_name': model_name,'ratio':ratio, 'model_id': model_id,'access_level':access_level})
     # u = User.query.filter_by(id=id).first()
     #
     #

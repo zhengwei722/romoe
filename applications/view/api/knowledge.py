@@ -1,7 +1,6 @@
 from flask import Blueprint, session, redirect, url_for, render_template, request
 from flask_login import login_required, current_user
 from sqlalchemy import desc
-from email_validator import validate_email, EmailNotValidError
 from applications.common import curd
 from applications.common.curd import enable_status, disable_status
 from applications.common.utils.http import table_api, fail_api, success_api

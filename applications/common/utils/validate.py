@@ -51,7 +51,7 @@ domain(value)
         ValidationFailure(func=domain, ...)
 '''
 
-email = validators.email
+verify_email = validators.email
 '''
  验证电子邮件地址。验证成功时返回 True ，验证失败时返回
      

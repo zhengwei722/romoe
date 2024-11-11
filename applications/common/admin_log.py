@@ -62,7 +62,12 @@ def api_log(request, start_time,end_time,total_time,response_dict, user_id,tips,
         success=info.get('success'),
         tips=info.get('tips')
     )
-    db.session.add(log)
-    db.session.commit()
+    try:
+        db.session.add(log)
+        db.session.flush()
+        db.session.commit()
 
-    return log.id
+        return log.id
+    except:
+        db.session.rollback()
+        return None

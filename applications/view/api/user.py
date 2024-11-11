@@ -1,9 +1,9 @@
+import time
 from email.policy import default
 
 from flask import Blueprint, session, redirect, url_for, render_template, request
 from flask_login import login_required, current_user
 from sqlalchemy import desc
-from email_validator import validate_email, EmailNotValidError
 from applications.common import curd
 from applications.common.curd import enable_status, disable_status
 from applications.common.utils.http import table_api, fail_api, success_api
@@ -24,6 +24,7 @@ from applications.common.utils.jwt import token_required_decorator,create_jwt_to
 from applications.common.utils.logger import log_decorator
 import uuid
 import pytz
+from applications.common.utils.validate import verify_email
 
 
 
@@ -42,10 +43,8 @@ def get_email_code():
         if email is None:
             return CustomResponse(code=CustomStatus.PARAM_ERROR.value, msg="请填写邮箱地址")
         # 验证email是否合法的email格式，是否有填写
-
-        validate_email(email)
-    except EmailNotValidError as e:
-        return CustomResponse(code=CustomStatus.EMAIL_FORMAT_MISALIGNMENT.value, msg="邮箱格式错误",data=str(e))
+        if not verify_email(email):
+            return CustomResponse(code=CustomStatus.EMAIL_FORMAT_MISALIGNMENT.value, msg="邮箱格式错误")
     except Exception as e:
         return CustomResponse(code=CustomStatus.INCOMPLETE_DATA.value, msg="数据不完整",data=str(e))
     # 发送验证码
@@ -96,10 +95,8 @@ def register():
             return CustomResponse(code=CustomStatus.LOGIN_CODE_MISS.value,msg="请填写验证码")
         # if identity_type not in ["学生", "上班族"]:
         #     return CustomResponse(code=CustomStatus.INVALID_PARAMETER.value,msg="请选择用户类型")
-        try:
-            validate_email(email)
-        except EmailNotValidError as e:
-            return CustomResponse(code=CustomStatus.EMAIL_FORMAT_MISALIGNMENT.value, msg="邮箱格式错误",data=str(e))
+        if not verify_email(email):
+            return CustomResponse(code=CustomStatus.EMAIL_FORMAT_MISALIGNMENT.value, msg="邮箱格式错误")
         if len(password) < 8:
             return CustomResponse(code=CustomStatus.PASSWORD_INSUFFICIENT_LENGTH.value, msg="密码长度必须至少为8个字符")
     except Exception as e:
@@ -171,10 +168,8 @@ def login():
         password = request.json.get('password')
         if email is None:
             return CustomResponse(code=CustomStatus.PARAM_ERROR.value,msg="请填写邮箱地址")
-        try:
-            validate_email(email)
-        except EmailNotValidError as e:
-            return CustomResponse(code=CustomStatus.EMAIL_FORMAT_MISALIGNMENT.value, msg="邮箱格式错误",data=str(e))
+        if not verify_email(email):
+            return CustomResponse(code=CustomStatus.EMAIL_FORMAT_MISALIGNMENT.value, msg="邮箱格式错误")
         if len(password) < 8:
             return CustomResponse(code=CustomStatus.PASSWORD_INSUFFICIENT_LENGTH.value, msg="密码长度必须至少为8个字符")
     except Exception as e:
@@ -252,6 +247,28 @@ def other(userId):
         "roles":roles[0].name
     }
     return CustomResponse(code=CustomStatus.PASSWORD_INSUFFICIENT_LENGTH.value, msg="success",data=data)
+
+
+@bp.get('/get_state')
+@token_required_decorator
+@log_decorator
+def get_state(userId):
+    user = User.query.filter_by(id=str(userId)).first()
+    if user.is_membership_expired():
+        default_role = ['2']
+        roles = Role.query.filter(Role.id.in_(default_role)).all()
+        user.role = roles
+        user.words = 0
+        db.session.commit()
+    data = {
+        'id': user.id,
+        'roles': [role.name for role in user.role][0],
+        'words': user.words,
+        'diamonds': user.diamonds,
+        'create_at': user.create_at.astimezone(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S'),
+        'membershipExpirationDate': user.membershipExpirationDate.astimezone(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S'),
+    }
+    return CustomResponse(code=CustomStatus.SUCCESS.value, msg='查询成功',data = data)
 
 @bp.get('/is_vip')
 @token_required_decorator

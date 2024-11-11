@@ -8,7 +8,7 @@ from flask import Flask, request, jsonify
 from applications.models import User, AdminLog
 from applications.common.utils.http import CustomResponse ,CustomStatus
 from applications.common.utils.redis import conn_redis_pool
-from applications.common.admin_log import login_log,api_log
+from applications.common.admin_log import api_log
 from datetime import datetime
 
 

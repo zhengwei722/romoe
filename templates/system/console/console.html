@@ -13,7 +13,7 @@
     <div class="layui-row layui-col-space10">
         <div class="layui-col-xs6 layui-col-md3">
             <div class="layui-card top-panel">
-                <div class="layui-card-header">今日访问</div>
+                <div class="layui-card-header">用户数量</div>
                 <div class="layui-card-body">
                     <div class="layui-row layui-col-space5">
                         <div class="layui-col-xs8 layui-col-md8 top-panel-number" style="color: #28333E;" id="value1">
@@ -213,7 +213,7 @@
 
     count.up('value1', {
       time: 4000,
-      num: 440.34,
+      num: {{user_number }},
       bit: 2,
       regulator: 50
     })
@@ -240,14 +240,31 @@
     })
 
     var echartsRecords = echarts.init(document.getElementById('echarts-records'), 'walden')
+    var days = {{ seven_days|tojson }};  // 注意 tojson 过滤器
+    var registrations = {{ seven_days_register|tojson }}; // 注意 tojson 过滤器
 
     var option = {
+        title: {
+    text: '用户注册量统计', // 主标题文本
+    subtext: '近七天注册数据', // 副标题文本 (可选)
+    left: 'left', // 标题水平位置，可以是 'left', 'center', 'right' 或具体的像素值
+    top: 'top',     // 标题垂直位置，可以是 'top', 'middle', 'bottom' 或具体的像素值
+    textStyle: {    // 标题文本样式
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: '#333' //  标题颜色
+    },
+    subtextStyle: { // 副标题文本样式 (可选)
+      fontSize: 14,
+      color: '#666'
+    }
+  },
       tooltip: {
         trigger: 'axis'
       },
       xAxis: [{
         type: 'category',
-        data: ['2019-01', '2019-02', '2019-03', '2019-04', '2019-05', '2019-06'],
+        data: days,
         axisLine: {
           lineStyle: {
             color: '#999'
@@ -277,9 +294,9 @@
         }
       }],
       series: [{
-        name: '课时',
+        name: '注册量',
         type: 'line',
-        data: [23, 60, 20, 36, 23, 85],
+        data:registrations,
         lineStyle: {
           normal: {
             width: 8,

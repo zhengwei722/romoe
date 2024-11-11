@@ -4,9 +4,11 @@ from collections import OrderedDict
 from flask import jsonify, current_app, Blueprint, render_template
 from flask_login import login_required, current_user
 from humanize.number import powers
-
+from datetime import datetime, timedelta, date
+from sqlalchemy import func
 from ...models import Power
 from ...schemas import PowerOutSchema
+from sqlalchemy import and_
 
 bp = Blueprint('rights', __name__, url_prefix='/rights')
 
@@ -131,29 +133,59 @@ def menu():
     #     print(12)
     #     return jsonify(sorted(menu_dict.get(0), key=lambda item: item['sort']))
     # else:
-        powers = Power.query.all()
-        power_schema = PowerOutSchema(many=True)  # 用已继承 ma.ModelSchema 类的自定制类生成序列化类
-        power_dict = power_schema.dump(powers)  # 生成可序列化对象
-        power_dict.sort(key=lambda x: (x['parent_id'], x['id']), reverse=True)
+    powers = Power.query.all()
+    power_schema = PowerOutSchema(many=True)  # 用已继承 ma.ModelSchema 类的自定制类生成序列化类
+    power_dict = power_schema.dump(powers)  # 生成可序列化对象
+    power_dict.sort(key=lambda x: (x['parent_id'], x['id']), reverse=True)
 
-        menu_dict = OrderedDict()
-        for _dict in power_dict:
-            if _dict['id'] in menu_dict:
-                # 当前节点添加子节点
-                _dict['children'] = copy.deepcopy(menu_dict[_dict['id']])
-                _dict['children'].sort(key=lambda item: item['sort'])
-                # 删除子节点
-                del menu_dict[_dict['id']]
+    menu_dict = OrderedDict()
+    for _dict in power_dict:
+        if _dict['id'] in menu_dict:
+            # 当前节点添加子节点
+            _dict['children'] = copy.deepcopy(menu_dict[_dict['id']])
+            _dict['children'].sort(key=lambda item: item['sort'])
+            # 删除子节点
+            del menu_dict[_dict['id']]
 
-            if _dict['parent_id'] not in menu_dict:
-                menu_dict[_dict['parent_id']] = [_dict]
-            else:
-                menu_dict[_dict['parent_id']].append(_dict)
-        return jsonify(sorted(menu_dict.get(0), key=lambda item: item['sort']))
+        if _dict['parent_id'] not in menu_dict:
+            menu_dict[_dict['parent_id']] = [_dict]
+        else:
+            menu_dict[_dict['parent_id']].append(_dict)
+    return jsonify(sorted(menu_dict.get(0), key=lambda item: item['sort']))
+
+
 from applications.models import User, AdminLog
+
+
 # 控制台页面
 @bp.get('/welcome')
 @login_required
 def welcome():
+    # 总用户数
     user_number = User.query.count()
-    return render_template('system/console/console.html')
+
+    today = datetime.today()
+
+    # 使用User模型的query对象来构建查询
+    # 会员用户数
+    member_user_number = User.query.filter(and_(User.membershipExpirationDate > today)).count()
+
+    # 获取当前时间
+
+    # 获取最近7天的日期列表
+    today = datetime.utcnow().date()
+    seven_days = []
+    for i in range(7):
+        date = today - timedelta(days=i)
+        date_str = date.strftime("%Y-%m-%d")
+        seven_days.append(date_str)
+    seven_days.reverse()
+    # 获取最近7天的注册量
+    seven_days_register = []
+    for date in seven_days:
+        count = User.query.filter(User.create_at.like(date + '%')).count()
+        seven_days_register.append(count)
+
+
+    return render_template('system/console/console.html', user_number=user_number, member_user_number=member_user_number
+                           , seven_days=seven_days, seven_days_register=seven_days_register)
