@@ -26,21 +26,15 @@ import requests
 bp = Blueprint('app', __name__, url_prefix='/app')
 
 @bp.get('/modellist')
-@token_required_decorator
 @log_decorator
-def modellist(userId):
+def modellist():
     try:
-        user = User.query.filter_by(id=userId).first()
-        if user.is_membership_expired():
-            access_level = 0
-        else:
-            access_level = 1
         appmodel_list = Appmodel.query.filter_by(enable=1)
         data = [{
             'id':appmodel.id,
             'model_name': appmodel.model_name,
             'model_id': appmodel.model_id,
-            'enable': (access_level == 1) or (access_level == 0 and appmodel.access_level == 0),
+            'enable':appmodel.access_level == 0,
             'type':appmodel.type
         } for appmodel in appmodel_list]
         return CustomResponse(msg="查询成功",data=data)
@@ -49,9 +43,8 @@ def modellist(userId):
 
 
 @bp.get('/applist')
-@token_required_decorator
 @log_decorator
-def applist(userId):
+def applist():
     try:
         appmodel_list = Applist.query.all()
         data = [{
@@ -66,9 +59,8 @@ def applist(userId):
 
 
 @bp.get('/rolelist')
-@token_required_decorator
 @log_decorator
-def rolelist(userId):
+def rolelist():
     try:
         appmodel_list = Appmodelrole.query.all()
         data = [{
