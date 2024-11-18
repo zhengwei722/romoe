@@ -58,8 +58,8 @@ def get_email_code():
 
         body_content = cfg["LOGIN_CODE_EMAIL_BODY_CONTENT"].format(login_code=email_code)
 
-        # msg = Message(subject="欢迎使用Romoe", recipients=email.split(";"), body=body_content)
-        # flask_mail.send(msg)
+        msg = Message(subject="欢迎使用Romoe", recipients=email.split(";"), body=body_content)
+        flask_mail.send(msg)
         return CustomResponse(msg="发送成功")
     except SQLAlchemyError:
         return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误",data=str('SQLAlchemyError'))
