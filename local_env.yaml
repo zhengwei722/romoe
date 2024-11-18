@@ -9,7 +9,7 @@ SECRET_KEY = "GiKDzmkgUyvAGqc3rIoukOx4bYpXTrb9tyYXzIHUhtA"
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 REDIS_PASSWORD = '123456'
-REDIS_DB = 15
+REDIS_DB = 151
 
 # mysql 配置
 MYSQL_USERNAME = "root"
