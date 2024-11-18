@@ -285,3 +285,24 @@ def is_vip(userId):
     return CustomResponse(code=CustomStatus.SUCCESS.value, msg='会员')
 
 
+@bp.post('/update_withdraw_info')
+@token_required_decorator
+@log_decorator
+def withdraw_info(userId):
+    try:
+        alipay_account = request.json.get('alipay_account')
+        alipay_name = request.json.get('alipay_name')
+        if not alipay_account or not alipay_name:
+            return CustomResponse(code=CustomStatus.INVALID_PARAMETER.value, msg='参数错误')
+        user = User.query.filter_by(id=str(userId)).first()
+        user.alipay_account = alipay_account
+        user.alipay_name = alipay_name
+        db.session.commit()
+        return CustomResponse(msg='更新成功')
+    except SQLAlchemyError:
+        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误",data=str('SQLAlchemyError'))
+
+
+
+
+

@@ -11,7 +11,7 @@ from applications.common.utils.http import table_api, fail_api, success_api
 from applications.common.utils.rights import authorize
 from applications.common.utils.validate import str_escape
 from applications.extensions import db
-from applications.models import Role,PayOrder,InviteRecord
+from applications.models import Role,PayOrder,InviteRecord,WithdrawRecord
 from applications.models import User, AdminLog, Knowledge, Appmodel, PayOrder
 from applications.common.utils.http import CustomResponse, CustomStatus
 import random
@@ -152,5 +152,27 @@ def get_product_list(userId):
             'status': False if packet  and product.code == 'packet' and [role.id for role in user.role][0] ==2 else True,
         } for product in products]
         return CustomResponse(msg="操作成功", data=data)
+    except Exception as e:
+        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误", data=str(e))
+
+
+@bp.post('withdraw')
+@token_required_decorator
+@log_decorator
+def withdraw(userId):
+    try:
+        amount = request.json.get('amount')
+        user = User.query.filter(User.id == userId).first()
+        if not user.alipay_account or not user.alipay_name:
+            return CustomResponse(code=CustomStatus.INVALID_PARAMETER.value, msg="请先完善支付宝信息")
+        if float(amount) > user.commission:
+            return CustomResponse(code=CustomStatus.INSUFFICIENT_BALANCE.value, msg="余额不足")
+
+        withdraw = WithdrawRecord(amount=float(amount), user_id=userId, account=user.alipay_account, name=user.alipay_name)
+        # 扣除用户余额
+        user.commission -= float(amount)
+        db.session.add(withdraw)
+        db.session.commit()
+        return CustomResponse(msg="操作成功")
     except Exception as e:
         return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误", data=str(e))

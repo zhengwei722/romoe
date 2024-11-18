@@ -23,6 +23,9 @@ class User(db.Model, UserMixin):
     invitationCode = db.Column(db.String(20), comment='邀请码')
     commission = db.Column(db.Float(precision=2), default=0.0, comment='佣金')
     role = db.relationship('Role', secondary="user_role", backref=db.backref('user'), lazy='dynamic')
+    # 收款账号
+    alipay_account = db.Column(db.String(50), comment='支付宝账号')
+    alipay_name = db.Column(db.String(50), comment='支付宝姓名')
 
 
     def set_password(self, password):
