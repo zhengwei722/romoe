@@ -10,7 +10,7 @@ from applications.common.utils.http import table_api, fail_api, success_api
 from applications.common.utils.rights import authorize
 from applications.common.utils.validate import str_escape
 from applications.extensions import db
-from applications.models import Role,InviteRecord
+from applications.models import Role,InviteRecord,WithdrawRecord
 from applications.models import User, AdminLog
 from applications.common.utils.http import CustomResponse ,CustomStatus
 import random
@@ -25,7 +25,7 @@ from applications.common.utils.logger import log_decorator
 import uuid
 import pytz
 from applications.common.utils.validate import verify_email
-
+from datetime import datetime, timedelta
 
 
 bp = Blueprint('user', __name__, url_prefix='/user')
@@ -301,6 +301,56 @@ def withdraw_info(userId):
         return CustomResponse(msg='更新成功')
     except SQLAlchemyError:
         return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误",data=str('SQLAlchemyError'))
+
+
+@bp.get('/invitation')
+@token_required_decorator
+@log_decorator
+def invitation(userId):
+    try:
+        user = User.query.filter_by(id=userId).first()
+        invitationCode = user.invitationCode
+        #总邀请
+        total_invitation = InviteRecord.query.filter_by(inviter_id=userId).count()
+        #本月邀请
+
+        current_month_first_day = datetime.now().replace(day=1)
+        next_month_first_day = (current_month_first_day + timedelta(days=31)).replace(day=1)
+
+        current_month_invitation = InviteRecord.query.filter(
+            InviteRecord.inviter_id == userId,
+            InviteRecord.created_at >= current_month_first_day,
+            InviteRecord.created_at < next_month_first_day
+        ).count()
+        # 总收益
+        total_amount_list = InviteRecord.query.filter_by(inviter_id=userId).all()
+        total_amount = 0
+        for i in total_amount_list:
+            total_amount += i.cashback_amount
+
+        # 提现记录
+        withdraw_records = WithdrawRecord.query.filter_by(user_id=userId).all()
+        records = [{
+            'id': withdraw_record.id,
+            'amount': withdraw_record.amount,
+            'status': withdraw_record.status,
+            'created_at': withdraw_record.created_at.astimezone(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S'),
+            'update_at': withdraw_record.updated_at.astimezone(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S'),
+
+        } for withdraw_record in withdraw_records]
+        data = {
+            'invitationCode': invitationCode,
+            'total_invitation': total_invitation,
+            'current_month_invitation': current_month_invitation,
+            'total_amount': total_amount,
+            'records': records
+        }
+        return CustomResponse(code=CustomStatus.SUCCESS.value, msg='查询成功',data=data)
+    except:
+        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误",data=str('SQLAlchemyError'))
+
+
+
 
 
 

@@ -61,12 +61,12 @@ class User(db.Model, UserMixin):
 
     def add_commission(self, commission):
         """
-        增加或减少用户的钻石数量。
+        增加或减少用户的佣金数量。
 
-        :param amount: 要增加或减少的钻石数量，可以是正数或负数。
+        :param amount: 要增加或减少的佣金数量，可以是正数或负数。
         """
         if not isinstance(commission, int):
-            raise TypeError("增加或减少的钻石数量必须是一个整数。")
+            raise TypeError("增加或减少的佣金数量必须是一个整数。")
 
         self.commission += commission
         # 确保钻石数量不会变成负数
