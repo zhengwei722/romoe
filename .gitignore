@@ -4,3 +4,5 @@
 local_env.yaml
 test_env.yaml
 pro_env.yaml
+/applications/common/utils/private_key.txt
+/applications/common/utils/public_key.txt
