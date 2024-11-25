@@ -81,9 +81,17 @@ def alipay_verify_pay():
             user.add_words(role.words)
             user.extend_membership(role.member_day)
             # 改变用户身份
-            default_role = [role.id]
-            roles = Role.query.filter(Role.id.in_(default_role)).all()
-            user.role = roles
+            role_names = [role.name for role in user.role][0]
+            # 如果pay_note是年度会员，role_names是普通用户或者月度会员，则改变身份，如果pay_note是月度会员，role_names是普通用户，则改变身份，如果pay_note是流量包，则不改变
+            if pay_note == '年度会员' and role_names in ['普通用户', '月度会员', '体验会员']:
+                default_role = [role.id]
+                roles = Role.query.filter(Role.id.in_(default_role)).all()
+                user.role = roles
+            if pay_note == '月度会员' and role_names in ['普通用户', '体验会员']:
+                default_role = [role.id]
+                roles = Role.query.filter(Role.id.in_(default_role)).all()
+                user.role = roles
+
 
             # 反佣金
             inviteRecord = InviteRecord.query.filter(InviteRecord.invitee_id == uid).first()
@@ -91,10 +99,12 @@ def alipay_verify_pay():
                 inviter = User.query.filter(User.id == inviteRecord.inviter_id).first()
                 if order.note == '月度会员':
                     inviter.add_commission(10)
+                    inviteRecord.cashback_amount = 10
                     inviteRecord.isreturnedCash = 1
                     db.session.add(inviteRecord)
                 if order.note == '年度会员':
                     inviter.add_commission(50)
+                    inviteRecord.cashback_amount = 50
                     inviteRecord.isreturnedCash = 1
                     db.session.add(inviteRecord)
 
@@ -172,7 +182,12 @@ def withdraw(userId):
         # 扣除用户余额
         user.commission -= float(amount)
         db.session.add(withdraw)
+        db.session.flush()
+        commission = user.commission
         db.session.commit()
-        return CustomResponse(msg="操作成功")
+        data = {
+            'commission': commission
+        }
+        return CustomResponse(msg="操作成功",data=data)
     except Exception as e:
         return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误", data=str(e))
