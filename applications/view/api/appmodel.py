@@ -23,6 +23,9 @@ from applications.common.utils.logger import log_decorator
 import uuid
 import json
 import requests
+from flask import Response
+import os
+
 bp = Blueprint('app', __name__, url_prefix='/app')
 
 @bp.get('/modellist')
@@ -72,3 +75,16 @@ def rolelist():
         return CustomResponse(msg="查询成功",data=data)
     except Exception as e:
         return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误",data=str(e))
+
+
+# 获取本地文件图片
+@bp.get('/get_image/<filename>')
+def get_image(filename):
+    if not os.path.exists(f'static/upload/{filename}'):
+        return CustomResponse(code=CustomStatus.FILE_NOT_FOUND.value, msg='图片不存在')
+    try:
+        with open(f'static/upload/{filename}', 'rb') as f:
+            image_data = f.read()
+        return Response(image_data, mimetype='image/png')
+    except:
+        return CustomResponse(code=CustomStatus.SERVER_ERROR.value, msg="服务端错误")
